@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>BOM位号差异比对｜加密版</title>
+<style>
+body{font-family:微软雅黑;padding:40px;background:#f0f2f5;}
+.box{background:#fff;padding:30px;border-radius:8px;max-width:850px;margin:0 auto;}
+button,input{margin:10px 0;padding:10px 16px;border-radius:4px;border:1px solid #ccc;}
+button{background:#2385ee;color:#fff;border:none;cursor:pointer;}
+#msg{margin-top:15px;color:red;}
+.lock-box{text-align:center;margin-top:80px;}
+</style>
+</head>
+<body>
+
+<div id="lockWrap" class="lock-box">
+    <h3>请输入访问密码</h3>
+    <input type="password" id="pwd" placeholder="输入密码">
+    <br>
+    <button onclick="checkPwd()">确认解锁</button>
+</div>
+
+<div id="mainWrap" class="box" style="display:none;">
+    <h3>B→C 修改项生成器（【位号强制比对】加密版）</h3>
+    <p>规则：同一位号物料不同 ➜ 自动 删除旧料 + 新增新料</p>
+
+    <div>
+        <input type="file" id="file1" accept=".xlsx"><span> 选择 A→B 修改项</span>
+    </div>
+    <div>
+        <input type="file" id="file2" accept=".xlsx"><span> 选择 A→C 修改项</span>
+    </div>
+
+    <button onclick="run()">一键生成 B→C</button>
+    <div id="msg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// 访问密码
+const PASSWD = "cvte2026";
+
+function checkPwd(){
+    let p = document.getElementById("pwd").value.trim();
+    if(p === PASSWD){
+        document.getElementById("lockWrap").style.display = "none";
+        document.getElementById("mainWrap").style.display = "block";
+    }else{
+        alert("密码错误");
+    }
+}
+
+let file1Data = null;
+let file2Data = null;
+
+// 读取A→B
+document.getElementById("file1").addEventListener("change",function(e){
+    let f = e.target.files[0];
+    let r = new FileReader();
+    r.onload = function(res){
+        let wb = XLSX.read(res.target.result);
+        file1Data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        tip("✅ A→B 读取完成");
+    };
+    r.readAsArrayBuffer(f);
+});
+
+// 读取A→C
+document.getElementById("file2").addEventListener("change",function(e){
+    let f = e.target.files[0];
+    let r = new FileReader();
+    r.onload = function(res){
+        let wb = XLSX.read(res.target.result);
+        file2Data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        tip("✅ A→C 读取完成");
+    };
+    r.readAsArrayBuffer(f);
+});
+
+function tip(text){
+    document.getElementById("msg").innerText = text;
+}
+
+function run(){
+    if(!file1Data || !file2Data){
+        tip("❌ 请先上传两个Excel文件");
+        return;
+    }
+    let res = [];
+
+    // 1. 以位号构建映射
+    let mapB = {};
+    file1Data.forEach(row=>{
+        let key = (row["位号"]||"").toString().trim();
+        if(key) mapB[key] = row;
+    });
+
+    let mapC = {};
+    file2Data.forEach(row=>{
+        let key = (row["位号"]||"").toString().trim();
+        if(key) mapC[key] = row;
+    });
+
+    // 所有涉及的位号合集
+    let allKey = new Set([...Object.keys(mapB),...Object.keys(mapC)]);
+
+    allKey.forEach(key=>{
+        let rowB = mapB[key];
+        let rowC = mapC[key];
+
+        // 场景1：同一位号，两边都有，物料不一致 → 删旧+增新
+        if(rowB && rowC){
+            let codeB = (rowB["物料编码"]||"").toString().trim();
+            let codeC = (rowC["物料编码"]||"").toString().trim();
+            let nameB = (rowB["物料描述"]||"").toString().trim();
+            let nameC = (rowC["物料描述"]||"").toString().trim();
+
+            if(codeB !== codeC || nameB !== nameC){
+                let delItem = {...rowB};
+                delItem["操作"] = "DELETE";
+                delItem["备注"] = "B→C：同位置物料更换，移除旧料";
+                res.push(delItem);
+
+                let addItem = {...rowC};
+                addItem["操作"] = "ADD";
+                addItem["备注"] = "B→C：同位置物料更换，新增新料";
+                res.push(addItem);
+                return;
+            }
+        }
+
+        // 场景2：只有A→B有，A→C无 → 反向删除
+        if(rowB && !rowC){
+            let item = {...rowB};
+            item["操作"] = "DELETE";
+            item["备注"] = "B→C：A→B新增，B→C反向移除";
+            res.push(item);
+            return;
+        }
+
+        // 场景3：只有A→C有，A→B无 → 直接新增
+        if(!rowB && rowC){
+            let item = {...rowC};
+            item["操作"] = "ADD";
+            item["备注"] = "B→C：B→C需新增物料";
+            res.push(item);
+        }
+    });
+
+    let sheet = XLSX.utils.json_to_sheet(res);
+    let book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book,sheet,"B→C修改项");
+    XLSX.writeFile(book,"B→C修改项_位号比对版.xlsx");
+    tip("✅ 生成完成！已按位号强比对，物料差异自动删旧增新");
+}
+</script>
+</body>
+</html>
