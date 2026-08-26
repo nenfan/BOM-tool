@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOM修改项对比工具 V0.51‑fixInheritDesc</title>
+    <title>BOM修改项对比工具 V0.53‑fixBtnGray</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
@@ -52,6 +52,11 @@
         .btn-secondary:hover {
             background: #475569;
         }
+        .btn-small {
+            padding:4px 10px;
+            font-size:12px;
+            border-radius:4px;
+        }
         .tip-text {
             color: #64748b;
             font-size: 14px;
@@ -80,7 +85,7 @@
         }
 
         .entry-page {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -107,8 +112,6 @@
             font-size: 18px;
             color: #1e293b;
             margin-bottom: 16px;
-            display: flex;
-            align-items: center;
         }
         .instruction-card ul {
             padding-left: 20px;
@@ -144,23 +147,16 @@
         }
         .upload-card {
             flex: 1;
-            min-width: 350px;
+            min-width: 420px;
             background: white;
             border-radius: 12px;
             padding: 28px;
             box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-            transition: box-shadow 0.2s;
-        }
-        .upload-card:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
         .upload-card h3 {
             font-size: 18px;
             color: #2563eb;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .file-upload-wrapper {
             position: relative;
@@ -213,6 +209,35 @@
             transition: width 0.3s ease;
         }
 
+        .paste-block{
+            margin-top:20px;
+            border-top:1px solid #e5e7eb;
+            padding-top:16px;
+        }
+        .paste-block h4{
+            font-size:14px;
+            margin-bottom:8px;
+            color:#374151;
+        }
+        textarea.paste-ta{
+            width:100%;
+            min-height:120px;
+            border:1px solid #d1d5db;
+            border-radius:6px;
+            padding:8px;
+            font-family:Consolas,monospace;
+            font-size:12px;
+            resize:vertical;
+        }
+        .paste-row{
+            margin-bottom:12px;
+        }
+        .paste-btn-bar{
+            display:flex;
+            gap:8px;
+            margin-top:6px;
+        }
+
         .calc-section {
             text-align: center;
             margin-bottom: 40px;
@@ -224,25 +249,19 @@
             border-radius: 8px;
             font-size: 17px;
             font-weight: 600;
-            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.15);
         }
         .calc-btn:hover:not(:disabled) {
             background: #b91c1c;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(220, 38, 38, 0.2);
         }
         .calc-btn:disabled {
             background: #9ca3af;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
 
         .result-section {
             background: white;
             border-radius: 12px;
             padding: 32px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
             display: none;
         }
         .result-header {
@@ -253,12 +272,11 @@
             padding-bottom: 16px;
             border-bottom: 1px solid #f3f4f6;
             flex-wrap: wrap;
-            gap: 16px;
+            gap:16px;
         }
         .result-title {
             font-size: 18px;
             font-weight: 600;
-            color: #1e293b;
         }
         .btn-group {
             display: flex;
@@ -270,17 +288,11 @@
             padding: 10px 20px;
             border-radius: 8px;
         }
-        .copy-btn:hover {
-            background: #15803d;
-        }
         .download-btn {
             background: #f97316;
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
-        }
-        .download-btn:hover {
-            background: #ea580c;
         }
         .clear-btn {
             background: #64748b;
@@ -288,244 +300,180 @@
             padding: 10px 20px;
             border-radius: 8px;
         }
-        .clear-btn:hover {
-            background: #475569;
-        }
 
         .table-container {
             max-height: 500px;
             overflow-y: auto;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border:1px solid #e5e7eb;
+            border-radius:8px;
         }
         table {
-            width: 100%;
+            width:100%;
             border-collapse: collapse;
-            font-size: 14px;
-            table-layout: fixed;
+            font-size:14px;
         }
         th {
-            background: #f9fafb;
-            padding: 14px 12px;
-            text-align: left;
-            color: #1f2937;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            border-bottom: 2px solid #e5e7eb;
-            user-select: none;
-            cursor: col-resize;
+            background:#f9fafb;
+            padding:12px;
+            text-align:left;
+            border-bottom:2px solid #e5e7eb;
         }
         td {
-            padding: 12px;
-            border-bottom: 1px solid #f3f4f6;
-            color: #374151;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            padding:12px;
+            border-bottom:1px solid #f3f4f6;
         }
         .del-row td {
-            background: #fef2f2;
-            color: #b91c1c;
+            background:#fef2f2;
+            color:#b91c1c;
         }
         .add-row td {
-            background: #f0fdf4;
-            color: #15803d;
-        }
-        tr:hover td {
-            background-color: #f9fafb !important;
+            background:#f0fdf4;
+            color:#15803d;
         }
         .empty-result {
-            text-align: center;
-            padding: 60px 20px;
-            color: #6b7280;
-            font-size: 15px;
+            text-align:center;
+            padding:40px;
+            color:#6b7280;
         }
 
         .toast {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            padding: 12px 24px;
-            background: #1f2937;
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-            z-index: 9999;
+            position:fixed;
+            bottom:24px;
+            right:24px;
+            background:#1f2937;
+            color:white;
+            padding:12px 20px;
+            border-radius:8px;
+            opacity:0;
+            transition:0.3s;
+            z-index:9999;
         }
         .toast.show {
-            opacity: 1;
-            transform: translateY(0);
+            opacity:1;
         }
-
         .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 999;
+            position:fixed;
+            inset:0;
+            background:rgba(0,0,0,0.5);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            z-index:999;
         }
         .modal-content {
-            max-width: 800px;
-            width: 90%;
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
+            width:90%;
+            max-width:800px;
+            max-height:90vh;
+            overflow-y:auto;
+            background:white;
+            border-radius:12px;
+            padding:28px;
+            position:relative;
         }
         .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #64748b;
+            position:absolute;
+            top:16px;
+            right:16px;
+            font-size:22px;
+            cursor:pointer;
         }
-
-        @media (max-width: 768px) {
-            .entry-title {
-                font-size: 24px;
-            }
-            .instruction-card {
-                padding: 20px;
-            }
-            .upload-card {
-                min-width: 100%;
-                padding: 20px;
-            }
-            .calc-btn {
-                width: 100%;
-                padding: 14px 20px;
-            }
-            .result-section {
-                padding: 20px;
-            }
-            .btn-group {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-            .copy-btn, .download-btn, .clear-btn {
-                flex: 1;
-                text-align: center;
-                padding: 10px;
-            }
-            th, td {
-                padding: 10px 8px;
-                font-size: 13px;
-            }
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+        .preview-item {
+            font-family:Consolas,monospace;
+            font-size:12px;
+            margin:3px 0;
         }
     </style>
 </head>
 <body>
     <div class="entry-page container" id="entryPage">
-        <h1 class="entry-title">
-            BOM修改项对比工具
-            <span class="version-tag">V0.51‑fixInheritDesc</span>
-        </h1>
+        <h1 class="entry-title">BOM修改项对比工具 <span class="version-tag">V0.53‑fixBtnGray</span></h1>
         <div class="instruction-card">
             <h3>使用说明</h3>
             <ul>
-                <li>1. 上传A→B、A→C的BOM修改项文件（仅支持.xlsx/.xls格式）；</li>
-                <li>2. 物料比对优先级：优先物料编码；编码为空时降级使用完整物料描述做比对，描述文本完全一致才算同一物料；</li>
-                <li>3. 工具自动对比位号，计算得出B→C的修改项；</li>
-                <li>4. 支持复制对比结果或导出为Excel文件；</li>
-                <li>5. 输入校验约束：单文件同一个位号最多允许1次DELETE、最多允许1次ADD；禁止多次ADD/多次DELETE；</li>
-                <li>6. 业务规则：DELETE代表基准A该位号存在器件；换料固定格式：1行DELETE旧料 +1行ADD新料；</li>
-                <li>7. 本工具处于验证阶段，对比结果需用户自行验证。</li>
+                <li>1.上传A→B、A→C的BOM修改项Excel，也支持文本粘贴录入变更；</li>
+                <li>2.粘贴格式：每行Tab分隔三列：物料描述	数量	位号列表；位号支持逗号分隔多个；</li>
+                <li>3.物料比对优先物料编码；编码为空则使用完整物料描述比对；</li>
+                <li>4.输出自动合并同类物料，统计位号总数量；</li>
+                <li>5.校验：单个位号最多允许1条ADD+1条DELETE；</li>
+                <li>6.对比结果务必人工复核。</li>
             </ul>
-            <p class="validation-tip">提示：对比结果仅供参考，请务必人工验证准确性</p>
         </div>
         <button class="btn-primary" onclick="enterTool()">进入工具</button>
     </div>
 
     <div class="tool-page container" id="toolPage">
         <div class="tool-header">
-            <h2 class="tool-title">
-                BOM修改项对比工具 <span class="version-tag">V0.51‑fixInheritDesc</span>
-            </h2>
-            <button class="btn-secondary" onclick="openInstructionModal()">查看使用说明</button>
+            <h2 class="tool-title">BOM修改项对比工具 <span class="version-tag">V0.53‑fixBtnGray</span></h2>
+            <button class="btn-secondary" onclick="openInstructionModal()">查看说明</button>
         </div>
 
         <div class="upload-section">
             <div class="upload-card">
-                <h3>1. 上传 A→B 修改项文件</h3>
+                <h3>1.A→B 修改项</h3>
                 <div class="file-upload-wrapper">
-                    <button class="upload-btn">选择文件</button>
-                    <input type="file" class="file-input" id="file-ab" accept=".xlsx, .xls" onchange="loadFile('ab', this)">
+                    <button class="upload-btn">选择Excel文件</button>
+                    <input type="file" class="file-input" id="file-ab" accept=".xlsx,.xls" onchange="loadFile('ab',this)">
                 </div>
-                <p class="upload-hint">仅支持.xlsx/.xls格式文件，单loc最多1DELETE+1ADD</p>
                 <div class="file-status" id="file-ab-status">未选择文件</div>
-                <div class="progress-bar" id="progress-ab">
-                    <div class="progress-fill" id="progress-ab-fill"></div>
+                <div class="progress-bar" id="progress-ab"><div class="progress-fill" id="progress-ab-fill"></div></div>
+                <div class="paste-block">
+                    <div class="paste-row">
+                        <h4>A→B DELETE粘贴区</h4>
+                        <textarea class="paste-ta" id="pasteAbDel" oninput="checkEnableCalcBtn()"></textarea>
+                    </div>
+                    <div class="paste-row">
+                        <h4>A→B ADD粘贴区</h4>
+                        <textarea class="paste-ta" id="pasteAbAdd" oninput="checkEnableCalcBtn()"></textarea>
+                    </div>
+                    <div class="paste-btn-bar">
+                        <button class="btn-secondary btn-small" onclick="previewPaste('ab')">预览粘贴解析</button>
+                        <button class="btn-secondary btn-small" onclick="clearPaste('ab')">清空A‑B粘贴</button>
+                    </div>
                 </div>
             </div>
 
             <div class="upload-card">
-                <h3>2. 上传 A→C 修改项文件</h3>
+                <h3>2.A→C 修改项</h3>
                 <div class="file-upload-wrapper">
-                    <button class="upload-btn">选择文件</button>
-                    <input type="file" class="file-input" id="file-ac" accept=".xlsx, .xls" onchange="loadFile('ac', this)">
+                    <button class="upload-btn">选择Excel文件</button>
+                    <input type="file" class="file-input" id="file-ac" accept=".xlsx,.xls" onchange="loadFile('ac',this)">
                 </div>
-                <p class="upload-hint">仅支持.xlsx/.xls格式文件，单loc最多1DELETE+1ADD</p>
                 <div class="file-status" id="file-ac-status">未选择文件</div>
-                <div class="progress-bar" id="progress-ac">
-                    <div class="progress-fill" id="progress-ac-fill"></div>
+                <div class="progress-bar" id="progress-ac"><div class="progress-fill" id="progress-ac-fill"></div></div>
+                <div class="paste-block">
+                    <div class="paste-row">
+                        <h4>A→C DELETE粘贴区</h4>
+                        <textarea class="paste-ta" id="pasteAcDel" oninput="checkEnableCalcBtn()"></textarea>
+                    </div>
+                    <div class="paste-row">
+                        <h4>A→C ADD粘贴区</h4>
+                        <textarea class="paste-ta" id="pasteAcAdd" oninput="checkEnableCalcBtn()"></textarea>
+                    </div>
+                    <div class="paste-btn-bar">
+                        <button class="btn-secondary btn-small" onclick="previewPaste('ac')">预览粘贴解析</button>
+                        <button class="btn-secondary btn-small" onclick="clearPaste('ac')">清空A‑C粘贴</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="calc-section">
             <button class="calc-btn" id="calc-btn" disabled onclick="computeResult()">计算 B→C 修改项</button>
-            <p class="validation-tip">输入校验：同一个位号禁止多条ADD /多条DELETE；编码为空将使用物料描述比对，计算结果请人工复核</p>
         </div>
 
         <div class="result-section" id="resultSection">
             <div class="result-header">
-                <h3 class="result-title">B→C 对比结果</h3>
+                <h3 class="result-title">B→C对比结果</h3>
                 <div class="btn-group">
                     <button class="copy-btn" onclick="copyTable()">复制结果</button>
                     <button class="download-btn" onclick="exportExcel()">导出Excel</button>
-                    <button class="clear-btn" onclick="clearAllData()">清空数据</button>
+                    <button class="clear-btn" onclick="clearAllData()">清空全部</button>
                 </div>
             </div>
             <div class="table-container">
-                <table id="resultTable">
+                <table>
                     <thead>
-                        <tr>
-                            <th>物料编码</th>
-                            <th>物料描述</th>
-                            <th>位号</th>
-                            <th>操作</th>
-                            <th>数量</th>
-                            <th>备注</th>
-                        </tr>
+                        <tr><th>物料编码</th><th>物料描述</th><th>位号</th><th>操作</th><th>数量</th><th>备注</th></tr>
                     </thead>
                     <tbody id="resultBody"></tbody>
                 </table>
@@ -536,34 +484,20 @@
     <div class="modal" id="instructionModal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3 style="margin-bottom: 16px;">BOM修改项对比工具 V0.51‑fixInheritDesc - 使用说明</h3>
-            <ul style="padding-left: 20px; margin-bottom: 16px;">
-                <li>1. 上传要求：需上传两个Excel文件（A→B、A→C的修改项），文件需包含「物料编码、物料描述、位号、操作」列；</li>
-                <li>2. 操作列取值：仅支持ADD（新增）、DELETE/DEL（删除）；</li>
-                <li>3. <strong>物料比对规则</strong>
-                    <ul style="padding-left:20px;margin-top:4px;">
-                        <li>✅物料编码不为空：使用物料编码判断物料是否相同</li>
-                        <li>✅物料编码为空，物料描述不为空：降级使用完整物料描述字符串比对；描述任意字符不同，判定为不同物料</li>
-                        <li>⚠️物料编码、物料描述同时为空：脏数据，结果需要人工复核</li>
-                    </ul>
-                </li>
-                <li>4. <strong>输入强制校验：单份变更文件内，同一个位号loc约束</strong>
-                    <ul style="padding-left:20px;margin-top:4px;">
-                        <li>✅允许：仅ADD；仅DELETE；DELETE+ADD（换料，各最多一次）</li>
-                        <li>❌禁止：同一个位号2次及以上ADD / 2次及以上DELETE；多次交替变更；遇到直接报错拦截</li>
-                    </ul>
-                </li>
-                <li>5. 业务假设：DELETE代表基准A该位号存在器件；只有纯ADD无DELETE，代表基准A该位号为空；换料固定成对：DELETE旧料 + ADD新料；</li>
-                <li>6. 计算逻辑：推断A原始状态，模拟执行变更得到B、C状态，得出B→C的修改项；</li>
-                <li>7. 结果说明：
-                    <ul style="padding-left: 20px; margin-top: 8px;">
-                        <li>- DELETE：需从B中删除该物料/位号；</li>
-                        <li>- ADD：需给B新增该物料/位号（对应C的状态）；</li>
-                        <li>- 数量：该物料+操作对应的位号总数；</li>
-                    </ul>
-                </li>
-                <li>8. 注意事项：编码为空依靠描述比对容易受空格、标点、换行干扰，务必人工校验结果。</li>
+            <h3>工具说明</h3>
+            <ul style="padding-left:20px;margin-top:10px;">
+                <li>粘贴每行Tab分隔三列：物料描述	数量	位号列表；中间数量仅格式校验，不参与运算；</li>
+                <li>粘贴有内容，则计算时使用粘贴数据；粘贴全空沿用Excel；</li>
+                <li>输出“数量”为合并后位号总个数，来自位号统计，不是粘贴输入的数字。</li>
             </ul>
+        </div>
+    </div>
+
+    <div class="modal" id="previewModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closePreviewModal()">&times;</span>
+            <h3>粘贴解析预览</h3>
+            <div id="previewBody"></div>
         </div>
     </div>
 
@@ -573,461 +507,344 @@
         let abMap = new Map();
         let acMap = new Map();
         const LocUtils = {
-            split: s => s ? s.split(/[,，\s]+/).filter(x => x) : [],
-            merge: arr => arr.sort().join(",")
+            split: s=>s?s.split(/[,，\s]+/).filter(x=>x):[],
+            merge: arr=>arr.sort().join(",")
         };
 
-        /**
-         * 获取物料比对唯一key
-         * 优先级：物料编码 > 物料描述 > [NO_MATERIAL_KEY]
-         */
         function getMaterialKey(item){
-            const pn = (item.partNum||"").trim();
-            const desc = (item.partDesc||"").trim();
-            if(pn !== ""){
-                return "PN::"+pn;
-            }
-            if(desc !== ""){
-                return "DESC::"+desc;
-            }
+            const pn=(item.partNum||"").trim();
+            const desc=(item.partDesc||"").trim();
+            if(pn) return "PN::"+pn;
+            if(desc) return "DESC::"+desc;
             return "NO_MATERIAL_KEY";
         }
 
-        function enterTool() {
-            document.getElementById("entryPage").style.display = "none";
-            document.getElementById("toolPage").style.display = "block";
+        function enterTool(){
+            document.getElementById("entryPage").style.display="none";
+            document.getElementById("toolPage").style.display="block";
+            checkEnableCalcBtn();
         }
 
-        function showToast(text, duration = 3500) {
-            const toast = document.getElementById("toast");
-            toast.textContent = text;
-            toast.classList.add("show");
-            setTimeout(() => {
-                toast.classList.remove("show");
-            }, duration);
+        function showToast(text,dur=3500){
+            const t=document.getElementById("toast");
+            t.textContent=text;
+            t.classList.add("show");
+            setTimeout(()=>t.classList.remove("show"),dur);
         }
+        function openInstructionModal(){document.getElementById("instructionModal").style.display="flex";}
+        function closeModal(){document.getElementById("instructionModal").style.display="none";}
+        function closePreviewModal(){document.getElementById("previewModal").style.display="none";}
 
-        function openInstructionModal() {
-            document.getElementById("instructionModal").style.display = "flex";
-        }
-        function closeModal() {
-            document.getElementById("instructionModal").style.display = "none";
-        }
+        function loadFile(type,input){
+            const file=input.files[0];
+            if(!file) return;
+            const progressBar=document.getElementById(`progress-${type}`);
+            const progressFill=document.getElementById(`progress-${type}-fill`);
+            const statusEl=document.getElementById(`file-${type}-status`);
+            progressBar.style.display="block";
+            progressFill.style.width="20%";
+            statusEl.textContent=`正在读取：${file.name}`;
 
-        function loadFile(type, input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const progressBar = document.getElementById(`progress-${type}`);
-            const progressFill = document.getElementById(`progress-${type}-fill`);
-            const statusEl = document.getElementById(`file-${type}-status`);
-            
-            progressBar.style.display = "block";
-            progressFill.style.width = "20%";
-            statusEl.textContent = `正在读取文件：${file.name}`;
-
-            const reader = new FileReader();
-            reader.onload = e => {
-                try {
-                    progressFill.style.width = "60%";
-                    const wb = XLSX.read(new Uint8Array(e.target.result), { type: "array" });
-                    progressFill.style.width = "80%";
-                    
-                    const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                    const head = json[0].map(c => (c + "").toLowerCase());
-                    
-                    const idx = {
-                        pn: head.findIndex(h => h.includes("物料编码") || h.includes("料号")),
-                        desc: head.findIndex(h => h.includes("物料描述")),
-                        loc: head.findIndex(h => h.includes("位号")),
-                        act: head.findIndex(h => h.includes("操作"))
+            const reader=new FileReader();
+            reader.onload=e=>{
+                try{
+                    progressFill.style.width="60%";
+                    const wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+                    progressFill.style.width="80%";
+                    const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+                    const head=json[0].map(c=>(c+"").toLowerCase());
+                    const idx={
+                        pn:head.findIndex(h=>h.includes("物料编码")||h.includes("料号")),
+                        desc:head.findIndex(h=>h.includes("物料描述")),
+                        loc:head.findIndex(h=>h.includes("位号")),
+                        act:head.findIndex(h=>h.includes("操作"))
                     };
-
-                    if (idx.pn === -1 || idx.loc === -1 || idx.act === -1) {
-                        throw new Error("文件格式错误：缺少物料编码、位号或操作列");
-                    }
-
-                    const tempMap = new Map();
-                    const checkStat = new Map();
-                    let hasEmptyPNRow = false;
-
-                    for (let i = 1; i < json.length; i++) {
-                        const r = json[i];
-                        if (!r[idx.pn] && !r[idx.loc] && !r[idx.act]) continue;
-                        
-                        const act = (r[idx.act] + "").trim().toUpperCase();
-                        if (!["ADD", "DELETE", "DEL"].includes(act)) continue;
-                        const realAct = act === "DEL" ? "DELETE" : act;
-                        
-                        const rawPn = (r[idx.pn] ?? "").toString().trim();
-                        const rawDesc = (r[idx.desc] ?? "").toString().trim() || "无描述";
-                        if(rawPn === "") hasEmptyPNRow = true;
-
-                        const locs = LocUtils.split(r[idx.loc] + "");
-                        locs.forEach(loc => {
-                            const l = loc.trim();
-                            const item = {
-                                partNum: rawPn,
-                                partDesc: rawDesc,
-                                loc: l,
-                                action: realAct
-                            };
-                            if (!tempMap.has(l)) tempMap.set(l, []);
+                    if(idx.pn===-1||idx.loc===-1||idx.act===-1) throw new Error("缺少物料编码/位号/操作列");
+                    const tempMap=new Map();
+                    const checkStat=new Map();
+                    for(let i=1;i<json.length;i++){
+                        const r=json[i];
+                        if(!r[idx.pn]&&!r[idx.loc]&&!r[idx.act]) continue;
+                        const act=(r[idx.act]+"").trim().toUpperCase();
+                        if(!["ADD","DELETE","DEL"].includes(act)) continue;
+                        const realAct=act==="DEL"?"DELETE":act;
+                        const rawPn=(r[idx.pn]??"").toString().trim();
+                        const rawDesc=(r[idx.desc]??"").toString().trim()||"无描述";
+                        const locs=LocUtils.split(r[idx.loc]+"");
+                        locs.forEach(loc=>{
+                            const l=loc.trim();
+                            const item={partNum:rawPn,partDesc:rawDesc,loc:l,action:realAct};
+                            if(!tempMap.has(l)) tempMap.set(l,[]);
                             tempMap.get(l).push(item);
-
                             if(!checkStat.has(l)) checkStat.set(l,{addCnt:0,delCnt:0});
-                            const stat = checkStat.get(l);
-                            if(realAct === "ADD") stat.addCnt +=1;
-                            if(realAct === "DELETE") stat.delCnt +=1;
+                            const st=checkStat.get(l);
+                            if(realAct==="ADD") st.addCnt++;
+                            if(realAct==="DELETE") st.delCnt++;
                         });
                     }
-
-                    for(const [loc,stat] of checkStat){
-                        if(stat.addCnt > 1){
-                            throw new Error(`【${file.name}】位号${loc} 存在${stat.addCnt}条ADD；规则：单个位号最多允许1条ADD`);
-                        }
-                        if(stat.delCnt >1){
-                            throw new Error(`【${file.name}】位号${loc} 存在${stat.delCnt}条DELETE；规则：单个位号最多允许1条DELETE`);
-                        }
+                    for(const [loc,st] of checkStat){
+                        if(st.addCnt>1) throw new Error(`位号${loc}多条ADD`);
+                        if(st.delCnt>1) throw new Error(`位号${loc}多条DELETE`);
                     }
-
-                    if(type === "ab") abMap = tempMap;
-                    else acMap = tempMap;
-
-                    progressFill.style.width = "100%";
-                    const totalRows = Array.from(tempMap.values()).reduce((s,arr)=>s+arr.length,0);
-                    statusEl.textContent = `✅已加载：${file.name}（拆分后 ${totalRows} 条变更记录）`;
-                    setTimeout(() => {
-                        progressBar.style.display = "none";
-                        progressFill.style.width = "0%";
-                    }, 500);
-
+                    if(type==="ab") abMap=tempMap; else acMap=tempMap;
+                    progressFill.style.width="100%";
+                    const total=Array.from(tempMap.values()).reduce((s,arr)=>s+arr.length,0);
+                    statusEl.textContent=`✅已加载 ${file.name} (${total}条)`;
+                    setTimeout(()=>{progressBar.style.display="none";progressFill.style.width="0%";},600);
                     checkEnableCalcBtn();
-                    showToast(`文件 ${file.name} 加载成功`);
-                    if(hasEmptyPNRow){
-                        setTimeout(()=>{
-                            showToast("警告：该文件存在物料编码为空行，将降级使用物料描述比对，请复核结果",4500);
-                        },800);
-                    }
-                } catch (error) {
-                    progressBar.style.display = "none";
-                    progressFill.style.width = "0%";
-                    statusEl.innerHTML = `<span class="error-text">❌加载失败：${error.message}</span>`;
-                    showToast(`文件加载失败：${error.message}`,5000);
+                    showToast("文件加载成功");
+                }catch(err){
+                    progressBar.style.display="none";
+                    statusEl.innerHTML=`<span style="color:red">❌${err.message}</span>`;
+                    showToast(err.message,5000);
                 }
             };
-
-            reader.onerror = () => {
-                progressBar.style.display = "none";
-                progressFill.style.width = "0%";
-                statusEl.textContent = "文件读取失败";
-                showToast("文件读取失败，请检查文件是否损坏");
-            };
-
             reader.readAsArrayBuffer(file);
         }
 
-        function checkEnableCalcBtn() {
-            document.getElementById("calc-btn").disabled = !(abMap.size > 0 && acMap.size > 0);
-        }
-
-        function clearAllData() {
-            abMap.clear();
-            acMap.clear();
-            
-            document.getElementById("file-ab").value = "";
-            document.getElementById("file-ac").value = "";
-            
-            document.getElementById("file-ab-status").textContent = "未选择文件";
-            document.getElementById("file-ac-status").textContent = "未选择文件";
-            
-            document.getElementById("resultSection").style.display = "none";
-            document.getElementById("calc-btn").disabled = true;
-            showToast("已清空所有数据");
-        }
-
-        /**
-         * 模拟单一位号变更序列
-         * 返回 {aHas, finalHas, finalPart, finalDesc, materialKey}
-         */
-        function simulate(changeList) {
-            if(!changeList || changeList.length ===0){
-                return {aHas: null, finalHas: null, finalPart: null, finalDesc: null, materialKey: null};
+        function parsePasteText(rawText,action,srcName){
+            const lines=rawText.split(/\r?\n/);
+            const items=[];
+            for(let i=0;i<lines.length;i++){
+                const line=lines[i].trim();
+                if(!line) continue;
+                const cols=line.split("\t");
+                if(cols.length<3) throw new Error(`${srcName}第${i+1}行，需要Tab分隔3列`);
+                const desc=cols[0].trim();
+                const locRaw=cols[2].trim();
+                const locList=LocUtils.split(locRaw);
+                for(const loc of locList){
+                    items.push({partNum:"",partDesc:desc,loc:loc,action:action});
+                }
             }
-            const hasDelete = changeList.some(c => c.action === "DELETE");
-            const hasAddOnly = changeList.every(c => c.action === "ADD");
-            let aHas;
-            if(hasDelete){
-                aHas = true;
-            }else if(hasAddOnly){
-                aHas = false;
+            return items;
+        }
+
+        function buildMapFromPaste(delText,addText,srcName){
+            const delItems=parsePasteText(delText,"DELETE",srcName+"‑DEL");
+            const addItems=parsePasteText(addText,"ADD",srcName+"‑ADD");
+            const all=[...delItems,...addItems];
+            const tempMap=new Map();
+            const checkStat=new Map();
+            for(const it of all){
+                if(!tempMap.has(it.loc)) tempMap.set(it.loc,[]);
+                tempMap.get(it.loc).push(it);
+                if(!checkStat.has(it.loc)) checkStat.set(it.loc,{addCnt:0,delCnt:0});
+                const st=checkStat.get(it.loc);
+                if(it.action==="ADD") st.addCnt++;
+                if(it.action==="DELETE") st.delCnt++;
+            }
+            for(const [loc,st] of checkStat){
+                if(st.addCnt>1) throw new Error(`${srcName}粘贴：位号${loc}多条ADD`);
+                if(st.delCnt>1) throw new Error(`${srcName}粘贴：位号${loc}多条DELETE`);
+            }
+            return {map:tempMap,delItems,addItems};
+        }
+
+        function previewPaste(side){
+            try{
+                let delTa,addTa,label;
+                if(side==="ab"){
+                    delTa=document.getElementById("pasteAbDel");
+                    addTa=document.getElementById("pasteAbAdd");
+                    label="A‑B";
+                }else{
+                    delTa=document.getElementById("pasteAcDel");
+                    addTa=document.getElementById("pasteAcAdd");
+                    label="A‑C";
+                }
+                const dTxt=delTa.value,aTxt=addTa.value;
+                if(!dTxt.trim()&&!aTxt.trim()){showToast(label+"粘贴为空");return;}
+                const ret=buildMapFromPaste(dTxt,aTxt,label);
+                let html=`<p>${label} 解析：DELETE=${ret.delItems.length} ADD=${ret.addItems.length}</p><hr>`;
+                html+="<div><b>DELETE</b></div>";
+                ret.delItems.forEach(x=>html+=`<div class="preview-item">[DEL] ${x.partDesc} | ${x.loc}</div>`);
+                html+="<div style='margin-top:8px'><b>ADD</b></div>";
+                ret.addItems.forEach(x=>html+=`<div class="preview-item">[ADD] ${x.partDesc} | ${x.loc}</div>`);
+                document.getElementById("previewBody").innerHTML=html;
+                document.getElementById("previewModal").style.display="flex";
+            }catch(e){showToast(e.message,6000);}
+        }
+
+        function clearPaste(side){
+            if(side==="ab"){
+                document.getElementById("pasteAbDel").value="";
+                document.getElementById("pasteAbAdd").value="";
             }else{
-                aHas = null;
+                document.getElementById("pasteAcDel").value="";
+                document.getElementById("pasteAcAdd").value="";
             }
+            checkEnableCalcBtn();
+            showToast("已清空粘贴");
+        }
 
-            let curHas = aHas;
-            let curPart = null;
-            let curDesc = null;
-            let curMaterialKey = null;
-            for(const c of changeList){
-                if(c.action === "DELETE"){
-                    curHas = false;
-                    curPart = null;
-                    curDesc = null;
-                    curMaterialKey = null;
-                }else if(c.action === "ADD"){
-                    curHas = true;
-                    curPart = c.partNum;
-                    curDesc = c.partDesc;
-                    curMaterialKey = getMaterialKey(c);
-                }
+        function applyPasteData(){
+            const abD=document.getElementById("pasteAbDel").value.trim();
+            const abA=document.getElementById("pasteAbAdd").value.trim();
+            if(abD||abA){
+                const r=buildMapFromPaste(abD,abA,"A‑B");
+                abMap=r.map;
             }
-            return {
-                aHas,
-                finalHas: curHas,
-                finalPart: curPart,
-                finalDesc: curDesc,
-                materialKey: curMaterialKey
+            const acD=document.getElementById("pasteAcDel").value.trim();
+            const acA=document.getElementById("pasteAcAdd").value.trim();
+            if(acD||acA){
+                const r=buildMapFromPaste(acD,acA,"A‑C");
+                acMap=r.map;
             }
         }
 
-        function computeResult() {
-            const allLoc = new Set([...abMap.keys(), ...acMap.keys()]);
-            const res = [];
+        //====修复这里：实时读DOM，不再依赖map.size判断按钮状态====
+        function checkEnableCalcBtn(){
+            const abDel=document.getElementById("pasteAbDel").value.trim();
+            const abAdd=document.getElementById("pasteAbAdd").value.trim();
+            const acDel=document.getElementById("pasteAcDel").value.trim();
+            const acAdd=document.getElementById("pasteAcAdd").value.trim();
 
-            for (const loc of allLoc) {
-                const abChanges = abMap.get(loc) || [];
-                const acChanges = acMap.get(loc) || [];
+            //A→B有效：文件加载成功(map不为空) OR 粘贴框任意不为空
+            const hasAbSource = abMap.size>0 || (abDel.length>0 || abAdd.length>0);
+            //A→C有效：文件加载成功(map不为空) OR 粘贴框任意不为空
+            const hasAcSource = acMap.size>0 || (acDel.length>0 || acAdd.length>0);
 
-                const simB = simulate(abChanges);
-                const simC = simulate(acChanges);
+            document.getElementById("calc-btn").disabled = !(hasAbSource && hasAcSource);
+        }
 
+        function clearAllData(){
+            abMap.clear();acMap.clear();
+            document.getElementById("file-ab").value="";
+            document.getElementById("file-ac").value="";
+            document.getElementById("pasteAbDel").value="";
+            document.getElementById("pasteAbAdd").value="";
+            document.getElementById("pasteAcDel").value="";
+            document.getElementById("pasteAcAdd").value="";
+            document.getElementById("file-ab-status").textContent="未选择文件";
+            document.getElementById("file-ac-status").textContent="未选择文件";
+            document.getElementById("resultSection").style.display="none";
+            checkEnableCalcBtn();
+            showToast("全部已清空");
+        }
+
+        function simulate(changeList){
+            if(!changeList||!changeList.length) return {aHas:null,finalHas:null,finalPart:null,finalDesc:null,materialKey:null};
+            const hasDel=changeList.some(c=>c.action==="DELETE");
+            const allAdd=changeList.every(c=>c.action==="ADD");
+            let aHas;
+            if(hasDel) aHas=true;
+            else if(allAdd) aHas=false;
+            else aHas=null;
+            let curHas=aHas,curPart=null,curDesc=null,curMK=null;
+            for(const c of changeList){
+                if(c.action==="DELETE"){
+                    curHas=false;curPart=null;curDesc=null;curMK=null;
+                }else{
+                    curHas=true;curPart=c.partNum;curDesc=c.partDesc;curMK=getMaterialKey(c);
+                }
+            }
+            return {aHas,finalHas:curHas,finalPart:curPart,finalDesc:curDesc,materialKey:curMK};
+        }
+
+        function computeResult(){
+            try{applyPasteData();}catch(e){showToast("粘贴解析失败："+e.message,6000);return;}
+            const allLoc=new Set([...abMap.keys(),...acMap.keys()]);
+            const res=[];
+            for(const loc of allLoc){
+                const abChg=abMap.get(loc)||[];
+                const acChg=acMap.get(loc)||[];
+                const simB=simulate(abChg);
+                const simC=simulate(acChg);
                 let A_has;
-                if(simB.aHas !== null) A_has = simB.aHas;
-                else if(simC.aHas !== null) A_has = simC.aHas;
-                else A_has = true;
+                if(simB.aHas!==null) A_has=simB.aHas;
+                else if(simC.aHas!==null) A_has=simC.aHas;
+                else A_has=true;
 
-                // 提取A基准物料（从DELETE行）
-                let A_original_part = "";
-                let A_original_desc = "";
-                const abDel = abChanges.find(x=>x.action==="DELETE");
-                const acDel = acChanges.find(x=>x.action==="DELETE");
-                if(abDel){
-                    A_original_part = abDel.partNum;
-                    A_original_desc = abDel.partDesc;
-                }else if(acDel){
-                    A_original_part = acDel.partNum;
-                    A_original_desc = acDel.partDesc;
-                }
-                // A基准虚拟对象，统一调用getMaterialKey，料号为空就用描述生成key
-                const A_item = {partNum:A_original_part, partDesc:A_original_desc};
-                const A_mk = getMaterialKey(A_item);
+                let A_pn="",A_desc="";
+                const abDel=abChg.find(x=>x.action==="DELETE");
+                const acDel=acChg.find(x=>x.action==="DELETE");
+                if(abDel){A_pn=abDel.partNum;A_desc=abDel.partDesc;}
+                else if(acDel){A_pn=acDel.partNum;A_desc=acDel.partDesc;}
+                const A_mk=getMaterialKey({partNum:A_pn,partDesc:A_desc});
 
-                let B_has = simB.finalHas !== null ? simB.finalHas : A_has;
-                let B_part = simB.finalPart;
-                let B_desc = simB.finalDesc;
-                let B_mk = simB.materialKey;
-                // B继承A基准状态，补全part、desc、materialKey
-                if(B_has && B_mk === null){
-                    B_part = A_original_part;
-                    B_desc = A_original_desc;
-                    B_mk = A_mk;
-                }
+                let B_has=simB.finalHas!==null?simB.finalHas:A_has;
+                let B_p=simB.finalPart,B_d=simB.finalDesc,B_mk=simB.materialKey;
+                if(B_has&&B_mk===null){B_p=A_pn;B_d=A_desc;B_mk=A_mk;}
 
-                let C_has = simC.finalHas !== null ? simC.finalHas : A_has;
-                let C_part = simC.finalPart;
-                let C_desc = simC.finalDesc;
-                let C_mk = simC.materialKey;
-                // C继承A基准状态，补全part、desc、materialKey
-                if(C_has && C_mk === null){
-                    C_part = A_original_part;
-                    C_desc = A_original_desc;
-                    C_mk = A_mk;
-                }
+                let C_has=simC.finalHas!==null?simC.finalHas:A_has;
+                let C_p=simC.finalPart,C_d=simC.finalDesc,C_mk=simC.materialKey;
+                if(C_has&&C_mk===null){C_p=A_pn;C_d=A_desc;C_mk=A_mk;}
 
-                if (B_has && !C_has) {
-                    res.push({
-                        partNum: B_part ?? "",
-                        partDesc: B_desc ?? "",
-                        loc,
-                        action: "DELETE",
-                        remark: `A原${A_has?"有":"无"}, B有C无 → 删除`
-                    });
-                } else if (!B_has && C_has) {
-                    res.push({
-                        partNum: C_part ?? "",
-                        partDesc: C_desc ?? "",
-                        loc,
-                        action: "ADD",
-                        remark: `A原${A_has?"有":"无"}, B无C有 → 新增`
-                    });
-                } else if(B_has && C_has){
-                    // 使用materialKey做物料是否相同判断
-                    if(B_mk !== C_mk){
-                        res.push({
-                            partNum: B_part ?? "",
-                            partDesc: B_desc ?? "",
-                            loc,
-                            action: "DELETE",
-                            remark: "物料发生变化 → 删除B旧物料"
-                        });
-                        res.push({
-                            partNum: C_part ?? "",
-                            partDesc: C_desc ?? "",
-                            loc,
-                            action: "ADD",
-                            remark: "物料发生变化 → 增加C新物料"
-                        });
+                if(B_has&&!C_has){
+                    res.push({partNum:B_p||"",partDesc:B_d||"",loc,action:"DELETE",remark:"B有C无，删除"});
+                }else if(!B_has&&C_has){
+                    res.push({partNum:C_p||"",partDesc:C_d||"",loc,action:"ADD",remark:"B无C有，新增"});
+                }else if(B_has&&C_has){
+                    if(B_mk!==C_mk){
+                        res.push({partNum:B_p||"",partDesc:B_d||"",loc,action:"DELETE",remark:"物料变更删旧料"});
+                        res.push({partNum:C_p||"",partDesc:C_d||"",loc,action:"ADD",remark:"物料变更加新料"});
                     }
                 }
             }
 
-            const group = new Map();
-            for(const item of res){
-                const key = `${item.action}|${item.partNum}|${item.partDesc}`;
-                if(!group.has(key)) group.set(key, {...item, locs:[]});
-                group.get(key).locs.push(item.loc);
+            const group=new Map();
+            for(const it of res){
+                const k=`${it.action}|${it.partNum}|${it.partDesc}`;
+                if(!group.has(k)) group.set(k,{...it,locs:[]});
+                group.get(k).locs.push(it.loc);
             }
-
-            const result = Array.from(group.values()).map(g=>({
-                partNum:g.partNum,
-                partDesc:g.partDesc,
-                loc:LocUtils.merge(g.locs),
-                action:g.action,
-                qty:g.locs.length,
-                remark:g.remark
+            const out=Array.from(group.values()).map(g=>({
+                partNum:g.partNum,partDesc:g.partDesc,loc:LocUtils.merge(g.locs),action:g.action,qty:g.locs.length,remark:g.remark
             }));
-
-            renderResult(result);
+            render(out);
         }
 
-        function renderResult(result) {
-            const tbody = document.getElementById("resultBody");
-            tbody.innerHTML = "";
-
-            if (result.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-result">暂无对比结果</td></tr>`;
-                document.getElementById("resultSection").style.display = "block";
-                showToast("计算完成：暂无对比结果");
+        function render(list){
+            const tbody=document.getElementById("resultBody");
+            tbody.innerHTML="";
+            if(!list.length){
+                tbody.innerHTML=`<tr><td colspan="6" class="empty-result">无对比结果</td></tr>`;
+                document.getElementById("resultSection").style.display="block";
+                showToast("计算完成，无差异");
                 return;
             }
-
-            result.forEach(item => {
-                const tr = document.createElement("tr");
-                tr.className = item.action === "DELETE" ? "del-row" : "add-row";
-                tr.innerHTML = `
-                    <td>${item.partNum}</td>
-                    <td>${item.partDesc}</td>
-                    <td>${item.loc}</td>
-                    <td>${item.action}</td>
-                    <td>${item.qty}</td>
-                    <td>${item.remark}</td>
-                `;
+            list.forEach(item=>{
+                const tr=document.createElement("tr");
+                tr.className=item.action==="DELETE"?"del-row":"add-row";
+                tr.innerHTML=`<td>${item.partNum}</td><td>${item.partDesc}</td><td>${item.loc}</td><td>${item.action}</td><td>${item.qty}</td><td>${item.remark}</td>`;
                 tbody.appendChild(tr);
             });
-
-            document.getElementById("resultSection").style.display = "block";
-            showToast("计算完成：共生成 " + result.length + " 条对比结果");
-            initTableColumnResize();
+            document.getElementById("resultSection").style.display="block";
+            showToast(`计算完成，共${list.length}条输出`);
         }
 
-        function initTableColumnResize() {
-            const table = document.getElementById("resultTable");
-            const ths = table.querySelectorAll("th");
-            let isResizing = false;
-            let currentTh = null;
-            let startX = 0;
-            let startWidth = 0;
-
-            ths.forEach(th => {
-                th.addEventListener("mousedown", (e) => {
-                    if (e.offsetX > th.offsetWidth - 10) {
-                        isResizing = true;
-                        currentTh = th;
-                        startX = e.pageX;
-                        startWidth = th.offsetWidth;
-                        document.body.style.cursor = "col-resize";
-                    }
-                });
+        async function copyTable(){
+            const rows=Array.from(document.querySelectorAll("#resultBody tr"));
+            if(!rows.length||rows[0].querySelector(".empty-result")){showToast("无结果");return;}
+            let txt="物料编码\t物料描述\t位号\t操作\t数量\t备注\n";
+            rows.forEach(tr=>{
+                txt+=Array.from(tr.querySelectorAll("td")).map(d=>d.textContent).join("\t")+"\n";
             });
+            await navigator.clipboard.writeText(txt);
+            showToast("已复制");
+        }
 
-            document.addEventListener("mousemove", (e) => {
-                if (!isResizing) return;
-                const diff = e.pageX - startX;
-                currentTh.style.width = (startWidth + diff) + "px";
-                currentTh.style.minWidth = "80px";
+        function exportExcel(){
+            const rows=[["物料编码","物料描述","位号","操作","数量","备注"]];
+            const trs=document.querySelectorAll("#resultBody tr");
+            if(!trs.length||trs[0].querySelector(".empty-result")){showToast("无结果导出");return;}
+            trs.forEach(tr=>{
+                rows.push(Array.from(tr.querySelectorAll("td")).map(td=>td.textContent));
             });
-
-            document.addEventListener("mouseup", () => {
-                if (isResizing) {
-                    isResizing = false;
-                    currentTh = null;
-                    document.body.style.cursor = "default";
-                }
-            });
+            const wb=XLSX.utils.book_new();
+            const ws=XLSX.utils.aoa_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb,ws,"B‑C结果");
+            XLSX.writeFile(wb,"B‑C对比结果.xlsx");
+            showToast("已导出Excel");
         }
 
-        async function copyTable() {
-            try {
-                const rows = Array.from(document.querySelectorAll("#resultBody tr"));
-                if (rows.length === 0 || rows[0].querySelector(".empty-result")) {
-                    showToast("暂无结果可复制");
-                    return;
-                }
-
-                let text = "物料编码\t物料描述\t位号\t操作\t数量\t备注\n";
-                rows.forEach(tr => {
-                    text += Array.from(tr.querySelectorAll("td"))
-                        .map(td => td.textContent)
-                        .join("\t") + "\n";
-                });
-
-                await navigator.clipboard.writeText(text);
-                showToast("结果已复制到剪贴板");
-            } catch (error) {
-                showToast("复制失败：" + error.message);
-            }
-        }
-
-        function exportExcel() {
-            const rows = [["物料编码", "物料描述", "位号", "操作", "数量", "备注"]];
-            const tbodyRows = document.querySelectorAll("#resultBody tr");
-
-            if (tbodyRows.length === 0 || tbodyRows[0].querySelector(".empty-result")) {
-                showToast("暂无结果可导出");
-                return;
-            }
-
-            tbodyRows.forEach(tr => {
-                rows.push(Array.from(tr.querySelectorAll("td")).map(td => td.textContent));
-            });
-
-            const date = new Date();
-            const dateStr = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
-            const fileName = `B‑C_${dateStr}.xlsx`;
-
-            const ws = XLSX.utils.aoa_to_sheet(rows);
-            ws["!cols"] = [
-                {wch: 18},
-                {wch: 45},
-                {wch: 30},
-                {wch: 8},
-                {wch: 8},
-                {wch: 24}
-            ];
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "B‑C对比结果");
-            XLSX.writeFile(wb, fileName);
-            showToast(`Excel导出成功：${fileName}`);
-        }
-
-        window.onclick = function(e) {
-            const modal = document.getElementById("instructionModal");
-            if (e.target === modal) {
-                closeModal();
-            }
-        }
+        window.onclick=e=>{
+            const m1=document.getElementById("instructionModal");
+            const m2=document.getElementById("previewModal");
+            if(e.target===m1) m1.style.display="none";
+            if(e.target===m2) m2.style.display="none";
+        };
     </script>
 </body>
 </html>
