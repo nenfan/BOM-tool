@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOM修改项对比工具 V0.1</title>
+    <title>BOM修改项对比工具 V0.3‑check</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* 全局样式重置与基础设置 */
         * {
             margin: 0;
             padding: 0;
@@ -73,8 +72,10 @@
             margin-top: 12px;
             font-style: italic;
         }
+        .error-text{
+            color:#dc2626;
+        }
 
-        /* 进入界面样式 */
         .entry-page {
             height: 100vh;
             display: flex;
@@ -115,7 +116,6 @@
             color: #475569;
         }
 
-        /* 工具主界面样式 */
         .tool-page {
             display: none;
             padding: 40px 0;
@@ -210,7 +210,6 @@
             transition: width 0.3s ease;
         }
 
-        /* 计算按钮 */
         .calc-section {
             text-align: center;
             margin-bottom: 40px;
@@ -236,7 +235,6 @@
             box-shadow: none;
         }
 
-        /* 结果区域 */
         .result-section {
             background: white;
             border-radius: 12px;
@@ -291,7 +289,6 @@
             background: #475569;
         }
 
-        /* 表格样式 */
         .table-container {
             max-height: 500px;
             overflow-y: auto;
@@ -343,7 +340,6 @@
             font-size: 15px;
         }
 
-        /* 提示弹窗 */
         .toast {
             position: fixed;
             bottom: 24px;
@@ -363,7 +359,6 @@
             transform: translateY(0);
         }
 
-        /* 使用说明弹窗 */
         .modal {
             position: fixed;
             top: 0;
@@ -384,6 +379,7 @@
             padding: 32px;
             max-height: 90vh;
             overflow-y: auto;
+            position: relative;
         }
         .modal-close {
             position: absolute;
@@ -394,7 +390,6 @@
             color: #64748b;
         }
 
-        /* 响应式适配 */
         @media (max-width: 768px) {
             .entry-title {
                 font-size: 24px;
@@ -428,7 +423,6 @@
             }
         }
 
-        /* 滚动条样式 */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -447,11 +441,10 @@
     </style>
 </head>
 <body>
-    <!-- 进入界面 -->
     <div class="entry-page container" id="entryPage">
         <h1 class="entry-title">
             BOM修改项对比工具
-            <span class="version-tag">V0.1</span>
+            <span class="version-tag">V0.3‑check</span>
         </h1>
         <div class="instruction-card">
             <h3>使用说明</h3>
@@ -459,18 +452,19 @@
                 <li>1. 上传A→B、A→C的BOM修改项文件（仅支持.xlsx/.xls格式）；</li>
                 <li>2. 工具将自动对比位号，计算得出B→C的修改项；</li>
                 <li>3. 支持复制对比结果或导出为Excel文件；</li>
-                <li>4. 本工具处于验证阶段，对比结果需用户自行验证。</li>
+                <li>4. 输入校验约束：单文件同一个位号最多允许1次DELETE、最多允许1次ADD；禁止多次ADD/多次DELETE；</li>
+                <li>5. 业务规则：DELETE代表基准A该位号存在器件；换料固定格式：1行DELETE旧料 +1行ADD新料；</li>
+                <li>6. 本工具处于验证阶段，对比结果需用户自行验证。</li>
             </ul>
             <p class="validation-tip">提示：对比结果仅供参考，请务必人工验证准确性</p>
         </div>
         <button class="btn-primary" onclick="enterTool()">进入工具</button>
     </div>
 
-    <!-- 工具主界面 -->
     <div class="tool-page container" id="toolPage">
         <div class="tool-header">
             <h2 class="tool-title">
-                BOM修改项对比工具 <span class="version-tag">V0.1</span>
+                BOM修改项对比工具 <span class="version-tag">V0.3‑check</span>
             </h2>
             <button class="btn-secondary" onclick="openInstructionModal()">查看使用说明</button>
         </div>
@@ -482,7 +476,7 @@
                     <button class="upload-btn">选择文件</button>
                     <input type="file" class="file-input" id="file-ab" accept=".xlsx, .xls" onchange="loadFile('ab', this)">
                 </div>
-                <p class="upload-hint">仅支持.xlsx/.xls格式文件</p>
+                <p class="upload-hint">仅支持.xlsx/.xls格式文件，单loc最多1DELETE+1ADD</p>
                 <div class="file-status" id="file-ab-status">未选择文件</div>
                 <div class="progress-bar" id="progress-ab">
                     <div class="progress-fill" id="progress-ab-fill"></div>
@@ -495,7 +489,7 @@
                     <button class="upload-btn">选择文件</button>
                     <input type="file" class="file-input" id="file-ac" accept=".xlsx, .xls" onchange="loadFile('ac', this)">
                 </div>
-                <p class="upload-hint">仅支持.xlsx/.xls格式文件</p>
+                <p class="upload-hint">仅支持.xlsx/.xls格式文件，单loc最多1DELETE+1ADD</p>
                 <div class="file-status" id="file-ac-status">未选择文件</div>
                 <div class="progress-bar" id="progress-ac">
                     <div class="progress-fill" id="progress-ac-fill"></div>
@@ -505,7 +499,7 @@
 
         <div class="calc-section">
             <button class="calc-btn" id="calc-btn" disabled onclick="computeResult()">计算 B→C 修改项</button>
-            <p class="validation-tip">验证阶段：计算结果需自行验证</p>
+            <p class="validation-tip">输入校验：同一个位号禁止多条ADD /多条DELETE；计算结果请人工复核</p>
         </div>
 
         <div class="result-section" id="resultSection">
@@ -535,47 +529,49 @@
         </div>
     </div>
 
-    <!-- 使用说明弹窗 -->
     <div class="modal" id="instructionModal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3 style="margin-bottom: 16px;">BOM修改项对比工具 V0.1 - 使用说明</h3>
+            <h3 style="margin-bottom: 16px;">BOM修改项对比工具 V0.3‑check - 使用说明</h3>
             <ul style="padding-left: 20px; margin-bottom: 16px;">
                 <li>1. 上传要求：需上传两个Excel文件（A→B、A→C的修改项），文件需包含「物料编码、物料描述、位号、操作」列；</li>
                 <li>2. 操作列取值：仅支持ADD（新增）、DELETE/DEL（删除）；</li>
-                <li>3. 计算逻辑：通过A→B和A→C的操作联合推断A的原始状态，再对比B和C的最终状态得出B→C的修改项；</li>
-                <li>4. 结果说明：
+                <li>3. <strong>输入强制校验：单份变更文件内，同一个位号loc约束</strong>
+                    <ul style="padding-left:20px;margin-top:4px;">
+                        <li>✅允许：仅ADD；仅DELETE；DELETE+ADD（换料，各最多一次）</li>
+                        <li>❌禁止：同一个位号2次及以上ADD / 2次及以上DELETE；多次交替变更；遇到直接报错拦截</li>
+                    </ul>
+                </li>
+                <li>4. 业务假设：DELETE代表基准A该位号存在器件；只有纯ADD无DELETE，代表基准A该位号为空；换料固定成对：DELETE旧料 + ADD新料；</li>
+                <li>5. 计算逻辑：推断A原始状态，模拟执行变更得到B、C状态，得出B→C的修改项；</li>
+                <li>6. 结果说明：
                     <ul style="padding-left: 20px; margin-top: 8px;">
                         <li>- DELETE：需从B中删除该物料/位号；</li>
                         <li>- ADD：需给B新增该物料/位号（对应C的状态）；</li>
                         <li>- 数量：该物料+操作对应的位号总数；</li>
                     </ul>
                 </li>
-                <li>5. 注意事项：本工具处于验证阶段（V0.1），所有对比结果需人工验证准确性。</li>
+                <li>7. 注意事项：本工具处于验证阶段，所有对比结果需人工验证准确性。</li>
             </ul>
         </div>
     </div>
 
-    <!-- 提示弹窗 -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // 全局变量
-        let abSingleData = [];
-        let acSingleData = [];
+        let abMap = new Map();
+        let acMap = new Map();
         const LocUtils = {
             split: s => s ? s.split(/[,，\s]+/).filter(x => x) : [],
             merge: arr => arr.sort().join(",")
         };
 
-        // 进入工具
         function enterTool() {
             document.getElementById("entryPage").style.display = "none";
             document.getElementById("toolPage").style.display = "block";
         }
 
-        // 显示提示弹窗
-        function showToast(text, duration = 3000) {
+        function showToast(text, duration = 3500) {
             const toast = document.getElementById("toast");
             toast.textContent = text;
             toast.classList.add("show");
@@ -584,7 +580,6 @@
             }, duration);
         }
 
-        // 使用说明弹窗
         function openInstructionModal() {
             document.getElementById("instructionModal").style.display = "flex";
         }
@@ -592,12 +587,10 @@
             document.getElementById("instructionModal").style.display = "none";
         }
 
-        // 加载文件
         function loadFile(type, input) {
             const file = input.files[0];
             if (!file) return;
 
-            // 显示进度条
             const progressBar = document.getElementById(`progress-${type}`);
             const progressFill = document.getElementById(`progress-${type}-fill`);
             const statusEl = document.getElementById(`file-${type}-status`);
@@ -614,10 +607,8 @@
                     progressFill.style.width = "80%";
                     
                     const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1 });
-                    const data = [];
                     const head = json[0].map(c => (c + "").toLowerCase());
                     
-                    // 校验表头
                     const idx = {
                         pn: head.findIndex(h => h.includes("物料编码") || h.includes("料号")),
                         desc: head.findIndex(h => h.includes("物料描述")),
@@ -629,45 +620,63 @@
                         throw new Error("文件格式错误：缺少物料编码、位号或操作列");
                     }
 
-                    // 解析数据
+                    const tempMap = new Map();
+                    const checkStat = new Map();
+
                     for (let i = 1; i < json.length; i++) {
                         const r = json[i];
                         if (!r[idx.pn] && !r[idx.loc] && !r[idx.act]) continue;
                         
                         const act = (r[idx.act] + "").trim().toUpperCase();
                         if (!["ADD", "DELETE", "DEL"].includes(act)) continue;
+                        const realAct = act === "DEL" ? "DELETE" : act;
                         
                         const locs = LocUtils.split(r[idx.loc] + "");
                         locs.forEach(loc => {
-                            data.push({
+                            const l = loc.trim();
+                            const item = {
                                 partNum: (r[idx.pn] + "").trim(),
                                 partDesc: (r[idx.desc] + "").trim() || "无描述",
-                                loc: loc.trim(),
-                                action: act === "DEL" ? "DELETE" : act
-                            });
+                                loc: l,
+                                action: realAct
+                            };
+                            if (!tempMap.has(l)) tempMap.set(l, []);
+                            tempMap.get(l).push(item);
+
+                            if(!checkStat.has(l)) checkStat.set(l,{addCnt:0,delCnt:0});
+                            const stat = checkStat.get(l);
+                            if(realAct === "ADD") stat.addCnt +=1;
+                            if(realAct === "DELETE") stat.delCnt +=1;
                         });
                     }
 
-                    // 保存数据
-                    if (type === "ab") abSingleData = data;
-                    else acSingleData = data;
+                    for(const [loc,stat] of checkStat){
+                        if(stat.addCnt > 1){
+                            throw new Error(`【${file.name}】位号${loc} 存在${stat.addCnt}条ADD；规则：单个位号最多允许1条ADD`);
+                        }
+                        if(stat.delCnt >1){
+                            throw new Error(`【${file.name}】位号${loc} 存在${stat.delCnt}条DELETE；规则：单个位号最多允许1条DELETE`);
+                        }
+                    }
 
-                    // 更新状态
+                    if(type === "ab") abMap = tempMap;
+                    else acMap = tempMap;
+
                     progressFill.style.width = "100%";
-                    statusEl.textContent = `已加载：${file.name}（${data.length} 条位号数据）`;
+                    const totalRows = Array.from(tempMap.values()).reduce((s,arr)=>s+arr.length,0);
+                    statusEl.textContent = `✅已加载：${file.name}（拆分后 ${totalRows} 条变更记录）`;
                     setTimeout(() => {
                         progressBar.style.display = "none";
                         progressFill.style.width = "0%";
                     }, 500);
 
-                    // 启用计算按钮
                     checkEnableCalcBtn();
                     showToast(`文件 ${file.name} 加载成功`);
                 } catch (error) {
                     progressBar.style.display = "none";
                     progressFill.style.width = "0%";
-                    statusEl.textContent = `加载失败：${error.message}`;
-                    showToast(`文件加载失败：${error.message}`);
+                    statusEl.innerHTML = `<span class="error-text">❌加载失败：${error.message}</span>`;
+                    showToast(`文件加载失败：${error.message}`,5000);
                 }
             };
 
@@ -681,119 +690,140 @@
             reader.readAsArrayBuffer(file);
         }
 
-        // 检查计算按钮是否启用
         function checkEnableCalcBtn() {
-            document.getElementById("calc-btn").disabled = !(abSingleData.length && acSingleData.length);
+            document.getElementById("calc-btn").disabled = !(abMap.size > 0 && acMap.size > 0);
         }
 
-        // 清空所有数据
         function clearAllData() {
-            abSingleData = [];
-            acSingleData = [];
+            abMap.clear();
+            acMap.clear();
             
-            // 重置文件输入
             document.getElementById("file-ab").value = "";
             document.getElementById("file-ac").value = "";
             
-            // 重置状态
             document.getElementById("file-ab-status").textContent = "未选择文件";
             document.getElementById("file-ac-status").textContent = "未选择文件";
             
-            // 隐藏结果
             document.getElementById("resultSection").style.display = "none";
-            
-            // 禁用计算按钮
             document.getElementById("calc-btn").disabled = true;
-            
             showToast("已清空所有数据");
         }
 
-        // 核心计算逻辑（完全未改）
+        function simulate(changeList) {
+            if(!changeList || changeList.length ===0){
+                return {aHas: null, finalHas: null, finalPart: null};
+            }
+            const hasDelete = changeList.some(c => c.action === "DELETE");
+            const hasAddOnly = changeList.every(c => c.action === "ADD");
+            let aHas;
+            if(hasDelete){
+                aHas = true;
+            }else if(hasAddOnly){
+                aHas = false;
+            }else{
+                aHas = null;
+            }
+
+            let curHas = aHas;
+            let curPart = null;
+            for(const c of changeList){
+                if(c.action === "DELETE"){
+                    curHas = false;
+                    curPart = null;
+                }else if(c.action === "ADD"){
+                    curHas = true;
+                    curPart = c.partNum;
+                }
+            }
+            return {
+                aHas,
+                finalHas: curHas,
+                finalPart: curPart
+            }
+        }
+
         function computeResult() {
-            const abMap = new Map(abSingleData.map(x => [x.loc, x]));
-            const acMap = new Map(acSingleData.map(x => [x.loc, x]));
             const allLoc = new Set([...abMap.keys(), ...acMap.keys()]);
             const res = [];
 
             for (const loc of allLoc) {
-                const ab = abMap.get(loc);
-                const ac = acMap.get(loc);
+                const abChanges = abMap.get(loc) || [];
+                const acChanges = acMap.get(loc) || [];
 
-                // 推断A原始状态
-                let A_has = true;
-                if (ab?.action === "ADD" || ac?.action === "ADD") {
-                    A_has = false;
+                const simB = simulate(abChanges);
+                const simC = simulate(acChanges);
+
+                let A_has;
+                if(simB.aHas !== null) A_has = simB.aHas;
+                else if(simC.aHas !== null) A_has = simC.aHas;
+                else A_has = true;
+
+                let B_has = simB.finalHas !== null ? simB.finalHas : A_has;
+                let B_part = simB.finalPart;
+                let B_desc = abChanges[0]?.partDesc || "";
+
+                let C_has = simC.finalHas !== null ? simC.finalHas : A_has;
+                let C_part = simC.finalPart;
+                let C_desc = acChanges[0]?.partDesc || "";
+
+                let A_original_part = null;
+                let A_original_desc = "";
+                const abDelItem = abChanges.find(x => x.action === "DELETE");
+                if (abDelItem) {
+                    A_original_part = abDelItem.partNum;
+                    A_original_desc = abDelItem.partDesc;
+                }
+                const acDelItem = acChanges.find(x => x.action === "DELETE");
+                if (!A_original_part && acDelItem) {
+                    A_original_part = acDelItem.partNum;
+                    A_original_desc = acDelItem.partDesc;
                 }
 
-                // 计算B最终状态
-                let B_has = A_has;
-                let B_part = ab?.partNum || null;
-                if (ab) {
-                    if (ab.action === "ADD") B_has = true;
-                    if (ab.action === "DELETE") B_has = false;
+                if (C_has && C_part === null && A_original_part) {
+                    C_part = A_original_part;
+                    C_desc = A_original_desc;
+                }
+                if (B_has && B_part === null && A_original_part) {
+                    B_part = A_original_part;
+                    B_desc = A_original_desc;
                 }
 
-                // 计算C最终状态
-                let C_has = A_has;
-                let C_part = ac?.partNum || null;
-                if (ac) {
-                    if (ac.action === "ADD") C_has = true;
-                    if (ac.action === "DELETE") C_has = false;
-                }
-
-                // 对比B和C
                 if (B_has && !C_has) {
-                    res.push({ 
-                        partNum: B_part, 
-                        partDesc: ab?.partDesc || ac?.partDesc || "",
-                        loc, 
-                        action: "DELETE", 
-                        remark: `A原${A_has?"有":"无"}, B有C无 → 删除` 
+                    res.push({
+                        partNum: B_part || A_original_part || "[A基准原始物料‑请从基准BOM补全料号]",
+                        partDesc: B_desc || A_original_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                        loc,
+                        action: "DELETE",
+                        remark: `A原${A_has?"有":"无"}, B有C无 → 删除`
                     });
                 } else if (!B_has && C_has) {
-                    res.push({ 
-                        partNum: C_part, 
-                        partDesc: ac?.partDesc || ab?.partDesc || "",
-                        loc, 
-                        action: "ADD", 
-                        remark: `A原${A_has?"有":"无"}, B无C有 → 新增` 
+                    res.push({
+                        partNum: C_part || "[A基准原始物料‑请从基准BOM补全料号]",
+                        partDesc: C_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                        loc,
+                        action: "ADD",
+                        remark: `A原${A_has?"有":"无"}, B无C有 → 新增`
                     });
                 } else if (B_has && C_has) {
                     if (B_part !== C_part) {
-                        res.push({ 
-                            partNum: B_part, 
-                            partDesc: ab?.partDesc || "",
-                            loc, 
-                            action: "DELETE", 
-                            remark: "料号不同 → 删B旧项" 
+                        res.push({
+                            partNum: B_part || A_original_part || "[A基准原始物料‑请从基准BOM补全料号]",
+                            partDesc: B_desc || A_original_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                            loc,
+                            action: "DELETE",
+                            remark: "料号不同 → 删B旧项"
                         });
-                        res.push({ 
-                            partNum: C_part, 
-                            partDesc: ac?.partDesc || "",
-                            loc, 
-                            action: "ADD", 
-                            remark: "料号不同 → 加C新项" 
-                        });
-                    } else if (ab?.action === "ADD" && ac?.action === "ADD" && B_part !== C_part) {
-                        res.push({ 
-                            partNum: B_part, 
-                            partDesc: ab?.partDesc || "",
-                            loc, 
-                            action: "DELETE", 
-                            remark: "双ADD料号不同 → 删B旧项" 
-                        });
-                        res.push({ 
-                            partNum: C_part, 
-                            partDesc: ac?.partDesc || "",
-                            loc, 
-                            action: "ADD", 
-                            remark: "双ADD料号不同 → 加C新项" 
+                        res.push({
+                            partNum: C_part || A_original_part || "[A基准原始物料‑请从基准BOM补全料号]",
+                            partDesc: C_desc || A_original_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                            loc,
+                            action: "ADD",
+                            remark: "料号不同 → 加C新项"
                         });
                     }
                 }
             }
 
-            // 合并位号 + 统计数量
             const group = new Map();
             res.forEach(item => {
                 const key = `${item.action}-${item.partNum}-${item.partDesc}`;
@@ -807,11 +837,9 @@
                 qty: g.locs.length
             }));
 
-            // 渲染结果
             renderResult(result);
         }
 
-        // 渲染结果表格
         function renderResult(result) {
             const tbody = document.getElementById("resultBody");
             tbody.innerHTML = "";
@@ -839,12 +867,9 @@
 
             document.getElementById("resultSection").style.display = "block";
             showToast("计算完成：共生成 " + result.length + " 条对比结果");
-
-            // 表格列宽拖动功能
             initTableColumnResize();
         }
 
-        // 表格列宽拖动
         function initTableColumnResize() {
             const table = document.getElementById("resultTable");
             const ths = table.querySelectorAll("th");
@@ -855,7 +880,6 @@
 
             ths.forEach(th => {
                 th.addEventListener("mousedown", (e) => {
-                    // 仅在列边缘触发
                     if (e.offsetX > th.offsetWidth - 10) {
                         isResizing = true;
                         currentTh = th;
@@ -882,7 +906,6 @@
             });
         }
 
-        // 复制结果
         async function copyTable() {
             try {
                 const rows = Array.from(document.querySelectorAll("#resultBody tr"));
@@ -905,7 +928,6 @@
             }
         }
 
-        // 导出Excel（文件名：B-C_日期）
         function exportExcel() {
             const rows = [["物料编码", "物料描述", "位号", "操作", "数量", "备注"]];
             const tbodyRows = document.querySelectorAll("#resultBody tr");
@@ -919,31 +941,26 @@
                 rows.push(Array.from(tr.querySelectorAll("td")).map(td => td.textContent));
             });
 
-            // 生成日期（YYYYMMDD）
             const date = new Date();
             const dateStr = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
-            const fileName = `B-C_${dateStr}.xlsx`;
+            const fileName = `B‑C_${dateStr}.xlsx`;
 
-            // 生成Excel
             const ws = XLSX.utils.aoa_to_sheet(rows);
-            // 自动适配列宽
             ws["!cols"] = [
-                {wch: 15}, // 物料编码
-                {wch: 25}, // 物料描述
-                {wch: 30}, // 位号
-                {wch: 8},  // 操作
-                {wch: 8},  // 数量
-                {wch: 20}  // 备注
+                {wch: 15},
+                {wch: 25},
+                {wch: 30},
+                {wch: 8},
+                {wch: 8},
+                {wch: 20}
             ];
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "B-C对比结果");
+            XLSX.utils.book_append_sheet(wb, ws, "B‑C对比结果");
             XLSX.writeFile(wb, fileName);
-
             showToast(`Excel导出成功：${fileName}`);
         }
 
-        // 点击模态框外部关闭
         window.onclick = function(e) {
             const modal = document.getElementById("instructionModal");
             if (e.target === modal) {
