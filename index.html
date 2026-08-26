@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOM修改项对比工具 V0.3‑check</title>
+    <title>BOM修改项对比工具 V0.51‑fixInheritDesc</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
@@ -71,6 +71,9 @@
             font-size: 13px;
             margin-top: 12px;
             font-style: italic;
+        }
+        .warn-text{
+            color:#f59e0b;
         }
         .error-text{
             color:#dc2626;
@@ -444,17 +447,18 @@
     <div class="entry-page container" id="entryPage">
         <h1 class="entry-title">
             BOM修改项对比工具
-            <span class="version-tag">V0.3‑check</span>
+            <span class="version-tag">V0.51‑fixInheritDesc</span>
         </h1>
         <div class="instruction-card">
             <h3>使用说明</h3>
             <ul>
                 <li>1. 上传A→B、A→C的BOM修改项文件（仅支持.xlsx/.xls格式）；</li>
-                <li>2. 工具将自动对比位号，计算得出B→C的修改项；</li>
-                <li>3. 支持复制对比结果或导出为Excel文件；</li>
-                <li>4. 输入校验约束：单文件同一个位号最多允许1次DELETE、最多允许1次ADD；禁止多次ADD/多次DELETE；</li>
-                <li>5. 业务规则：DELETE代表基准A该位号存在器件；换料固定格式：1行DELETE旧料 +1行ADD新料；</li>
-                <li>6. 本工具处于验证阶段，对比结果需用户自行验证。</li>
+                <li>2. 物料比对优先级：优先物料编码；编码为空时降级使用完整物料描述做比对，描述文本完全一致才算同一物料；</li>
+                <li>3. 工具自动对比位号，计算得出B→C的修改项；</li>
+                <li>4. 支持复制对比结果或导出为Excel文件；</li>
+                <li>5. 输入校验约束：单文件同一个位号最多允许1次DELETE、最多允许1次ADD；禁止多次ADD/多次DELETE；</li>
+                <li>6. 业务规则：DELETE代表基准A该位号存在器件；换料固定格式：1行DELETE旧料 +1行ADD新料；</li>
+                <li>7. 本工具处于验证阶段，对比结果需用户自行验证。</li>
             </ul>
             <p class="validation-tip">提示：对比结果仅供参考，请务必人工验证准确性</p>
         </div>
@@ -464,7 +468,7 @@
     <div class="tool-page container" id="toolPage">
         <div class="tool-header">
             <h2 class="tool-title">
-                BOM修改项对比工具 <span class="version-tag">V0.3‑check</span>
+                BOM修改项对比工具 <span class="version-tag">V0.51‑fixInheritDesc</span>
             </h2>
             <button class="btn-secondary" onclick="openInstructionModal()">查看使用说明</button>
         </div>
@@ -499,7 +503,7 @@
 
         <div class="calc-section">
             <button class="calc-btn" id="calc-btn" disabled onclick="computeResult()">计算 B→C 修改项</button>
-            <p class="validation-tip">输入校验：同一个位号禁止多条ADD /多条DELETE；计算结果请人工复核</p>
+            <p class="validation-tip">输入校验：同一个位号禁止多条ADD /多条DELETE；编码为空将使用物料描述比对，计算结果请人工复核</p>
         </div>
 
         <div class="result-section" id="resultSection">
@@ -532,26 +536,33 @@
     <div class="modal" id="instructionModal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3 style="margin-bottom: 16px;">BOM修改项对比工具 V0.3‑check - 使用说明</h3>
+            <h3 style="margin-bottom: 16px;">BOM修改项对比工具 V0.51‑fixInheritDesc - 使用说明</h3>
             <ul style="padding-left: 20px; margin-bottom: 16px;">
                 <li>1. 上传要求：需上传两个Excel文件（A→B、A→C的修改项），文件需包含「物料编码、物料描述、位号、操作」列；</li>
                 <li>2. 操作列取值：仅支持ADD（新增）、DELETE/DEL（删除）；</li>
-                <li>3. <strong>输入强制校验：单份变更文件内，同一个位号loc约束</strong>
+                <li>3. <strong>物料比对规则</strong>
+                    <ul style="padding-left:20px;margin-top:4px;">
+                        <li>✅物料编码不为空：使用物料编码判断物料是否相同</li>
+                        <li>✅物料编码为空，物料描述不为空：降级使用完整物料描述字符串比对；描述任意字符不同，判定为不同物料</li>
+                        <li>⚠️物料编码、物料描述同时为空：脏数据，结果需要人工复核</li>
+                    </ul>
+                </li>
+                <li>4. <strong>输入强制校验：单份变更文件内，同一个位号loc约束</strong>
                     <ul style="padding-left:20px;margin-top:4px;">
                         <li>✅允许：仅ADD；仅DELETE；DELETE+ADD（换料，各最多一次）</li>
                         <li>❌禁止：同一个位号2次及以上ADD / 2次及以上DELETE；多次交替变更；遇到直接报错拦截</li>
                     </ul>
                 </li>
-                <li>4. 业务假设：DELETE代表基准A该位号存在器件；只有纯ADD无DELETE，代表基准A该位号为空；换料固定成对：DELETE旧料 + ADD新料；</li>
-                <li>5. 计算逻辑：推断A原始状态，模拟执行变更得到B、C状态，得出B→C的修改项；</li>
-                <li>6. 结果说明：
+                <li>5. 业务假设：DELETE代表基准A该位号存在器件；只有纯ADD无DELETE，代表基准A该位号为空；换料固定成对：DELETE旧料 + ADD新料；</li>
+                <li>6. 计算逻辑：推断A原始状态，模拟执行变更得到B、C状态，得出B→C的修改项；</li>
+                <li>7. 结果说明：
                     <ul style="padding-left: 20px; margin-top: 8px;">
                         <li>- DELETE：需从B中删除该物料/位号；</li>
                         <li>- ADD：需给B新增该物料/位号（对应C的状态）；</li>
                         <li>- 数量：该物料+操作对应的位号总数；</li>
                     </ul>
                 </li>
-                <li>7. 注意事项：本工具处于验证阶段，所有对比结果需人工验证准确性。</li>
+                <li>8. 注意事项：编码为空依靠描述比对容易受空格、标点、换行干扰，务必人工校验结果。</li>
             </ul>
         </div>
     </div>
@@ -565,6 +576,22 @@
             split: s => s ? s.split(/[,，\s]+/).filter(x => x) : [],
             merge: arr => arr.sort().join(",")
         };
+
+        /**
+         * 获取物料比对唯一key
+         * 优先级：物料编码 > 物料描述 > [NO_MATERIAL_KEY]
+         */
+        function getMaterialKey(item){
+            const pn = (item.partNum||"").trim();
+            const desc = (item.partDesc||"").trim();
+            if(pn !== ""){
+                return "PN::"+pn;
+            }
+            if(desc !== ""){
+                return "DESC::"+desc;
+            }
+            return "NO_MATERIAL_KEY";
+        }
 
         function enterTool() {
             document.getElementById("entryPage").style.display = "none";
@@ -622,6 +649,7 @@
 
                     const tempMap = new Map();
                     const checkStat = new Map();
+                    let hasEmptyPNRow = false;
 
                     for (let i = 1; i < json.length; i++) {
                         const r = json[i];
@@ -631,12 +659,16 @@
                         if (!["ADD", "DELETE", "DEL"].includes(act)) continue;
                         const realAct = act === "DEL" ? "DELETE" : act;
                         
+                        const rawPn = (r[idx.pn] ?? "").toString().trim();
+                        const rawDesc = (r[idx.desc] ?? "").toString().trim() || "无描述";
+                        if(rawPn === "") hasEmptyPNRow = true;
+
                         const locs = LocUtils.split(r[idx.loc] + "");
                         locs.forEach(loc => {
                             const l = loc.trim();
                             const item = {
-                                partNum: (r[idx.pn] + "").trim(),
-                                partDesc: (r[idx.desc] + "").trim() || "无描述",
+                                partNum: rawPn,
+                                partDesc: rawDesc,
                                 loc: l,
                                 action: realAct
                             };
@@ -672,6 +704,11 @@
 
                     checkEnableCalcBtn();
                     showToast(`文件 ${file.name} 加载成功`);
+                    if(hasEmptyPNRow){
+                        setTimeout(()=>{
+                            showToast("警告：该文件存在物料编码为空行，将降级使用物料描述比对，请复核结果",4500);
+                        },800);
+                    }
                 } catch (error) {
                     progressBar.style.display = "none";
                     progressFill.style.width = "0%";
@@ -709,9 +746,13 @@
             showToast("已清空所有数据");
         }
 
+        /**
+         * 模拟单一位号变更序列
+         * 返回 {aHas, finalHas, finalPart, finalDesc, materialKey}
+         */
         function simulate(changeList) {
             if(!changeList || changeList.length ===0){
-                return {aHas: null, finalHas: null, finalPart: null};
+                return {aHas: null, finalHas: null, finalPart: null, finalDesc: null, materialKey: null};
             }
             const hasDelete = changeList.some(c => c.action === "DELETE");
             const hasAddOnly = changeList.every(c => c.action === "ADD");
@@ -726,19 +767,27 @@
 
             let curHas = aHas;
             let curPart = null;
+            let curDesc = null;
+            let curMaterialKey = null;
             for(const c of changeList){
                 if(c.action === "DELETE"){
                     curHas = false;
                     curPart = null;
+                    curDesc = null;
+                    curMaterialKey = null;
                 }else if(c.action === "ADD"){
                     curHas = true;
                     curPart = c.partNum;
+                    curDesc = c.partDesc;
+                    curMaterialKey = getMaterialKey(c);
                 }
             }
             return {
                 aHas,
                 finalHas: curHas,
-                finalPart: curPart
+                finalPart: curPart,
+                finalDesc: curDesc,
+                materialKey: curMaterialKey
             }
         }
 
@@ -758,83 +807,95 @@
                 else if(simC.aHas !== null) A_has = simC.aHas;
                 else A_has = true;
 
+                // 提取A基准物料（从DELETE行）
+                let A_original_part = "";
+                let A_original_desc = "";
+                const abDel = abChanges.find(x=>x.action==="DELETE");
+                const acDel = acChanges.find(x=>x.action==="DELETE");
+                if(abDel){
+                    A_original_part = abDel.partNum;
+                    A_original_desc = abDel.partDesc;
+                }else if(acDel){
+                    A_original_part = acDel.partNum;
+                    A_original_desc = acDel.partDesc;
+                }
+                // A基准虚拟对象，统一调用getMaterialKey，料号为空就用描述生成key
+                const A_item = {partNum:A_original_part, partDesc:A_original_desc};
+                const A_mk = getMaterialKey(A_item);
+
                 let B_has = simB.finalHas !== null ? simB.finalHas : A_has;
                 let B_part = simB.finalPart;
-                let B_desc = abChanges[0]?.partDesc || "";
+                let B_desc = simB.finalDesc;
+                let B_mk = simB.materialKey;
+                // B继承A基准状态，补全part、desc、materialKey
+                if(B_has && B_mk === null){
+                    B_part = A_original_part;
+                    B_desc = A_original_desc;
+                    B_mk = A_mk;
+                }
 
                 let C_has = simC.finalHas !== null ? simC.finalHas : A_has;
                 let C_part = simC.finalPart;
-                let C_desc = acChanges[0]?.partDesc || "";
-
-                let A_original_part = null;
-                let A_original_desc = "";
-                const abDelItem = abChanges.find(x => x.action === "DELETE");
-                if (abDelItem) {
-                    A_original_part = abDelItem.partNum;
-                    A_original_desc = abDelItem.partDesc;
-                }
-                const acDelItem = acChanges.find(x => x.action === "DELETE");
-                if (!A_original_part && acDelItem) {
-                    A_original_part = acDelItem.partNum;
-                    A_original_desc = acDelItem.partDesc;
-                }
-
-                if (C_has && C_part === null && A_original_part) {
+                let C_desc = simC.finalDesc;
+                let C_mk = simC.materialKey;
+                // C继承A基准状态，补全part、desc、materialKey
+                if(C_has && C_mk === null){
                     C_part = A_original_part;
                     C_desc = A_original_desc;
-                }
-                if (B_has && B_part === null && A_original_part) {
-                    B_part = A_original_part;
-                    B_desc = A_original_desc;
+                    C_mk = A_mk;
                 }
 
                 if (B_has && !C_has) {
                     res.push({
-                        partNum: B_part || A_original_part || "[A基准原始物料‑请从基准BOM补全料号]",
-                        partDesc: B_desc || A_original_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                        partNum: B_part ?? "",
+                        partDesc: B_desc ?? "",
                         loc,
                         action: "DELETE",
                         remark: `A原${A_has?"有":"无"}, B有C无 → 删除`
                     });
                 } else if (!B_has && C_has) {
                     res.push({
-                        partNum: C_part || "[A基准原始物料‑请从基准BOM补全料号]",
-                        partDesc: C_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                        partNum: C_part ?? "",
+                        partDesc: C_desc ?? "",
                         loc,
                         action: "ADD",
                         remark: `A原${A_has?"有":"无"}, B无C有 → 新增`
                     });
-                } else if (B_has && C_has) {
-                    if (B_part !== C_part) {
+                } else if(B_has && C_has){
+                    // 使用materialKey做物料是否相同判断
+                    if(B_mk !== C_mk){
                         res.push({
-                            partNum: B_part || A_original_part || "[A基准原始物料‑请从基准BOM补全料号]",
-                            partDesc: B_desc || A_original_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                            partNum: B_part ?? "",
+                            partDesc: B_desc ?? "",
                             loc,
                             action: "DELETE",
-                            remark: "料号不同 → 删B旧项"
+                            remark: "物料发生变化 → 删除B旧物料"
                         });
                         res.push({
-                            partNum: C_part || A_original_part || "[A基准原始物料‑请从基准BOM补全料号]",
-                            partDesc: C_desc || A_original_desc || "[缺少基准BOM，无法获取原始物料描述]",
+                            partNum: C_part ?? "",
+                            partDesc: C_desc ?? "",
                             loc,
                             action: "ADD",
-                            remark: "料号不同 → 加C新项"
+                            remark: "物料发生变化 → 增加C新物料"
                         });
                     }
                 }
             }
 
             const group = new Map();
-            res.forEach(item => {
-                const key = `${item.action}-${item.partNum}-${item.partDesc}`;
-                if (!group.has(key)) group.set(key, { ...item, locs: [] });
+            for(const item of res){
+                const key = `${item.action}|${item.partNum}|${item.partDesc}`;
+                if(!group.has(key)) group.set(key, {...item, locs:[]});
                 group.get(key).locs.push(item.loc);
-            });
+            }
 
-            const result = Array.from(group.values()).map(g => ({
-                ...g,
-                loc: LocUtils.merge(g.locs),
-                qty: g.locs.length
+            const result = Array.from(group.values()).map(g=>({
+                partNum:g.partNum,
+                partDesc:g.partDesc,
+                loc:LocUtils.merge(g.locs),
+                action:g.action,
+                qty:g.locs.length,
+                remark:g.remark
             }));
 
             renderResult(result);
@@ -947,12 +1008,12 @@
 
             const ws = XLSX.utils.aoa_to_sheet(rows);
             ws["!cols"] = [
-                {wch: 15},
-                {wch: 25},
+                {wch: 18},
+                {wch: 45},
                 {wch: 30},
                 {wch: 8},
                 {wch: 8},
-                {wch: 20}
+                {wch: 24}
             ];
 
             const wb = XLSX.utils.book_new();
