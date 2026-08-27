@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOM修改项对比工具 V0.53‑fixBtnGray</title>
+    <title>BOM修改项对比工具 V0.55‑rawStrMatch</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
@@ -382,11 +382,62 @@
             font-size:12px;
             margin:3px 0;
         }
+
+        /* =========业务校验弹窗样式========= */
+        #businessCheckModal {
+            display:none;
+            position:fixed;
+            z-index:9999;
+            left:0;top:0;
+            width:100%;height:100%;
+            background:rgba(0,0,0,0.4);
+        }
+        #businessCheckModal .modal-inner{
+            background:#fff;
+            margin:5% auto;
+            padding:20px;
+            width:85%;max-width:1100px;
+            border-radius:8px;
+            max-height:80vh;
+            overflow:hidden;
+            display:flex;
+            flex-direction:column;
+        }
+        #businessCheckModal .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:12px;
+        }
+        #businessCheckModal h3{margin:0;font-size:16px;}
+        #businessCheckModal .close-btn{
+            border:none;background:#666;color:#fff;padding:4px 12px;border-radius:4px;cursor:pointer;
+        }
+        #businessCheckModal .table-wrap{
+            overflow:auto;flex:1;
+        }
+        #businessCheckModal table{
+            border-collapse:collapse;width:100%;font-size:13px;
+        }
+        #businessCheckModal th{
+            background:#f5f5f5;padding:6px;
+        }
+        #businessCheckModal td{
+            padding:6px;
+            border:1px solid #aaa;
+            word-break:break-all;
+        }
+        #businessCheckModal table tbody tr:hover{
+            background-color:#f8f9fa;
+        }
+        #businessCheckModal .tip{
+            margin-top:10px;color:#666;font-size:12px;
+        }
     </style>
 </head>
 <body>
     <div class="entry-page container" id="entryPage">
-        <h1 class="entry-title">BOM修改项对比工具 <span class="version-tag">V0.53‑fixBtnGray</span></h1>
+        <h1 class="entry-title">BOM修改项对比工具 <span class="version-tag">V0.55‑rawStrMatch</span></h1>
         <div class="instruction-card">
             <h3>使用说明</h3>
             <ul>
@@ -395,7 +446,8 @@
                 <li>3.物料比对优先物料编码；编码为空则使用完整物料描述比对；</li>
                 <li>4.输出自动合并同类物料，统计位号总数量；</li>
                 <li>5.校验：单个位号最多允许1条ADD+1条DELETE；</li>
-                <li>6.对比结果务必人工复核。</li>
+                <li>6.新增物料归一化业务校验，阻值使用原始物料描述字符串比对，不做kΩ数值换算；</li>
+                <li>7.对比结果务必人工复核。</li>
             </ul>
         </div>
         <button class="btn-primary" onclick="enterTool()">进入工具</button>
@@ -403,7 +455,7 @@
 
     <div class="tool-page container" id="toolPage">
         <div class="tool-header">
-            <h2 class="tool-title">BOM修改项对比工具 <span class="version-tag">V0.53‑fixBtnGray</span></h2>
+            <h2 class="tool-title">BOM修改项对比工具 <span class="version-tag">V0.55‑rawStrMatch</span></h2>
             <button class="btn-secondary" onclick="openInstructionModal()">查看说明</button>
         </div>
 
@@ -488,7 +540,8 @@
             <ul style="padding-left:20px;margin-top:10px;">
                 <li>粘贴每行Tab分隔三列：物料描述	数量	位号列表；中间数量仅格式校验，不参与运算；</li>
                 <li>粘贴有内容，则计算时使用粘贴数据；粘贴全空沿用Excel；</li>
-                <li>输出“数量”为合并后位号总个数，来自位号统计，不是粘贴输入的数字。</li>
+                <li>输出"数量"为合并后位号总个数，来自位号统计，不是粘贴输入的数字。</li>
+                <li>业务校验：阻值使用原始物料描述字符串比对，不做kΩ数值换算。</li>
             </ul>
         </div>
     </div>
@@ -502,6 +555,30 @@
     </div>
 
     <div class="toast" id="toast"></div>
+
+    <!-- 物料归一化业务校验弹窗 -->
+    <div id="businessCheckModal">
+        <div class="modal-inner">
+            <div class="header">
+                <h3>物料归一化业务校验清单</h3>
+                <button class="close-btn" id="closeCheckModal">关闭</button>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="60">等级</th>
+                            <th width="240">告警分类说明</th>
+                            <th>关键参数信息</th>
+                            <th width="220">涉及位号</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checkResultBody"></tbody>
+                </table>
+            </div>
+            <div class="tip">提示：仅业务建议，不会修改B‑C计算结果，请工程师人工评估处理</div>
+        </div>
+    </div>
 
     <script>
         let abMap = new Map();
@@ -693,16 +770,13 @@
             }
         }
 
-        //====修复这里：实时读DOM，不再依赖map.size判断按钮状态====
         function checkEnableCalcBtn(){
             const abDel=document.getElementById("pasteAbDel").value.trim();
             const abAdd=document.getElementById("pasteAbAdd").value.trim();
             const acDel=document.getElementById("pasteAcDel").value.trim();
             const acAdd=document.getElementById("pasteAcAdd").value.trim();
 
-            //A→B有效：文件加载成功(map不为空) OR 粘贴框任意不为空
             const hasAbSource = abMap.size>0 || (abDel.length>0 || abAdd.length>0);
-            //A→C有效：文件加载成功(map不为空) OR 粘贴框任意不为空
             const hasAcSource = acMap.size>0 || (acDel.length>0 || acAdd.length>0);
 
             document.getElementById("calc-btn").disabled = !(hasAbSource && hasAcSource);
@@ -790,8 +864,20 @@
                 group.get(k).locs.push(it.loc);
             }
             const out=Array.from(group.values()).map(g=>({
-                partNum:g.partNum,partDesc:g.partDesc,loc:LocUtils.merge(g.locs),action:g.action,qty:g.locs.length,remark:g.remark
+                partNum:g.partNum,
+                partDesc:g.partDesc,
+                loc:LocUtils.merge(g.locs),
+                action:g.action,
+                qty:g.locs.length,
+                remark:g.remark
             }));
+
+            //执行业务校验
+            const checkList = runBusinessCheck(out);
+            if(checkList.length>0){
+                renderCheckModal(checkList);
+            }
+
             render(out);
         }
 
@@ -842,8 +928,222 @@
         window.onclick=e=>{
             const m1=document.getElementById("instructionModal");
             const m2=document.getElementById("previewModal");
+            const mCheck=document.getElementById("businessCheckModal");
             if(e.target===m1) m1.style.display="none";
             if(e.target===m2) m2.style.display="none";
+            if(e.target===mCheck) mCheck.style.display="none";
+        };
+
+        // ====================物料归一化业务校验模块 V0.55‑rawStrMatch【修复版】====================
+        function getRawResString(str){
+            if(!str) return null;
+            return str.trim();
+        }
+
+        function parseBcItemDesc(rawDesc){
+            const ret = { parseError:false, parsed:null };
+            if(!rawDesc){
+                ret.parseError=true;
+                return ret;
+            }
+            const arr = rawDesc.split(',');
+            const type = arr[0].trim();
+            if(type === '厚膜电阻'){
+                ret.parsed = {
+                    type:"厚膜电阻",
+                    power: arr[1]?.trim()||"",
+                    resStr: getRawResString(arr[2]||""),
+                    tolerance: arr[3]?.trim()||"",
+                    package: arr[4]?.trim()||""
+                }
+                return ret;
+            }else if(type === '片式陶瓷电容'){
+                ret.parsed = {
+                    type:"片式陶瓷电容",
+                    capValue: parseFloat((arr[3]||"").replace(/uF/i,'')),
+                    voltage: arr[2]?.trim()||"",
+                    tolerance: arr[4]?.trim()||"",
+                    dielectric: arr[5]?.trim()||"",
+                    package: arr[6]?.trim()||""
+                }
+                return ret;
+            }
+            ret.parsed = { type:type };
+            ret.parseError = false;
+            return ret;
+        }
+
+        function groupBy(list, getKey){
+            const map = {};
+            for(const item of list){
+                const k = getKey(item);
+                if(!map[k]) map[k] = [];
+                map[k].push(item);
+            }
+            return map;
+        }
+
+        function sortSn(snArr){
+            return [...snArr].sort((a,b)=>{
+                const numA = Number(a.replace(/[^0-9]/g,''));
+                const numB = Number(b.replace(/[^0-9]/g,''));
+                return numA - numB;
+            })
+        }
+
+        function deduplicateCheckList(list){
+            const seen = new Set();
+            const out = [];
+            for(const row of list){
+                const key = `${row.title}||${row.info}||${row.sn.sort().join(',')}`;
+                if(!seen.has(key)){
+                    seen.add(key);
+                    out.push(row);
+                }
+            }
+            return out;
+        }
+
+        function runBusinessCheck(bcOut){
+            const checkList = [];
+            const addRawItems = bcOut.filter(it=>it.action === 'ADD');
+            const addList = [];
+            for(const row of addRawItems){
+                const snList = LocUtils.split(row.loc);
+                for(const sn of snList){
+                    const p = parseBcItemDesc(row.partDesc);
+                    addList.push({
+                        sn: sn,
+                        rawDesc: row.partDesc,
+                        parseError: p.parseError,
+                        parsed: p.parsed
+                    })
+                }
+            }
+
+            const RES_GROUP_A = new Set(["0ohm", "22ohm", "33ohm"]);
+            const RES_GROUP_B = new Set(["1kohm", "4.7kohm", "10kohm"]);
+
+            // 厚膜电阻校验
+            const resItems = addList.filter(x=>x.parsed?.type === '厚膜电阻' && x.parsed.resStr !== null);
+            const resGroup = groupBy(resItems, i=>`${i.parsed.type}|${i.parsed.power}|${i.parsed.package}`);
+            for(const groupVal of Object.values(resGroup)){
+                if(groupVal.length < 2) continue;
+                //同阻值多精度
+                const byR = groupBy(groupVal, x=>x.parsed.resStr);
+                for(const sub of Object.values(byR)){
+                    const tolSet = [...new Set(sub.map(s=>s.parsed.tolerance))];
+                    if(tolSet.length>1){
+                        const snList = sortSn(sub.map(s=>s.sn));
+                        checkList.push({
+                            level:'🟡',
+                            title:'物料归一建议‑同阻值仅精度不同',
+                            info:`${sub[0].parsed.type},${sub[0].parsed.power},${sub[0].parsed.resStr},${sub[0].parsed.package}；存在精度：${tolSet.join(',')}`,
+                            sn:snList
+                        })
+                    }
+                }
+                //按精度分组，A/B两组原始字符串阻值集合【修复：去重后不同阻值>=2才告警】
+                const byTol = groupBy(groupVal, x=>x.parsed.tolerance);
+                for(const tolGroup of Object.values(byTol)){
+                    const hitA = tolGroup.filter(i=>RES_GROUP_A.has(i.parsed.resStr));
+                    if(hitA.length>=2){
+                        const uniqueRA = [...new Set(hitA.map(x=>x.parsed.resStr))];
+                        if(uniqueRA.length >=2){
+                            const snList = sortSn(hitA.map(s=>s.sn));
+                            checkList.push({
+                                level:'🟡',
+                                title:'物料归一建议‑串阻阻值集合(0ohm/22ohm/33ohm)',
+                                info:`${hitA[0].parsed.type},${hitA[0].parsed.power},${hitA[0].parsed.tolerance},${hitA[0].parsed.package}；阻值：${uniqueRA.join(',')}`,
+                                sn:snList
+                            })
+                        }
+                    }
+                    const hitB = tolGroup.filter(i=>RES_GROUP_B.has(i.parsed.resStr));
+                    if(hitB.length>=2){
+                        const uniqueRB = [...new Set(hitB.map(x=>x.parsed.resStr))];
+                        if(uniqueRB.length >=2){
+                            const snList = sortSn(hitB.map(s=>s.sn));
+                            checkList.push({
+                                level:'🟡',
+                                title:'物料归一建议‑上下拉阻值集合(1kohm/4.7kohm/10kohm)',
+                                info:`${hitB[0].parsed.type},${hitB[0].parsed.power},${hitB[0].parsed.tolerance},${hitB[0].parsed.package}；阻值：${uniqueRB.join(',')}`,
+                                sn:snList
+                            })
+                        }
+                    }
+                }
+            }
+
+            //片式陶瓷电容校验
+            const capItems = addList.filter(x=>x.parsed?.type === '片式陶瓷电容');
+            const capGroup = groupBy(capItems, i=>`${i.parsed.type}|${i.parsed.capValue}|${i.parsed.dielectric}|${i.parsed.package}`);
+            for(const groupVal of Object.values(capGroup)){
+                if(groupVal.length<2) continue;
+                const voltSet = [...new Set(groupVal.map(x=>x.parsed.voltage))];
+                if(voltSet.length>1){
+                    const snList = sortSn(groupVal.map(s=>s.sn));
+                    checkList.push({
+                        level:'🟡',
+                        title:'物料归一建议‑仅耐压不同',
+                        info:`${groupVal[0].parsed.type},${groupVal[0].parsed.capValue}uF,${groupVal[0].parsed.dielectric},${groupVal[0].parsed.package}；耐压：${voltSet.join(',')}`,
+                        sn:snList
+                    })
+                }
+                const tolSet = [...new Set(groupVal.map(x=>x.parsed.tolerance))];
+                if(tolSet.length>1){
+                    const snList = sortSn(groupVal.map(s=>s.sn));
+                    checkList.push({
+                        level:'🟡',
+                        title:'物料归一建议‑仅精度不同',
+                        info:`${groupVal[0].parsed.type},${groupVal[0].parsed.capValue}uF,${groupVal[0].parsed.dielectric},${groupVal[0].parsed.package}；精度：${tolSet.join(',')}`,
+                        sn:snList
+                    })
+                }
+            }
+
+            //FPC/FFC检测、解析失败
+            for(const item of addList){
+                const desc = item.rawDesc||'';
+                if(/FPC|FFC/i.test(desc)){
+                    checkList.push({
+                        level:'🔔',
+                        title:'结构风险提醒‑FPC/FFC座子核对',
+                        info:'物料包含FPC/FFC，请核对当前屏型号，确认座子料号与屏结构匹配',
+                        sn:[item.sn]
+                    })
+                }
+                if(item.parseError){
+                    checkList.push({
+                        level:'⚠️',
+                        title:'物料参数解析失败，请人工复核',
+                        info:item.rawDesc,
+                        sn:[item.sn]
+                    })
+                }
+            }
+            return deduplicateCheckList(checkList);
+        }
+
+        function renderCheckModal(checkList){
+            const modal = document.getElementById("businessCheckModal");
+            const tbody = document.getElementById("checkResultBody");
+            tbody.innerHTML = '';
+            for(const row of checkList){
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.level}</td>
+                    <td>${row.title}</td>
+                    <td>${row.info}</td>
+                    <td>${sortSn(row.sn).join(",")}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+            modal.style.display = "block";
+        }
+
+        document.getElementById("closeCheckModal").onclick = function(){
+            document.getElementById("businessCheckModal").style.display = "none";
         };
     </script>
 </body>
