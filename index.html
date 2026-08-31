@@ -805,8 +805,16 @@
             if(hasDel) aHas=true;
             else if(allAdd) aHas=false;
             else aHas=null;
+
+            //修复BUG：仿真内部强制排序，DELETE优先执行，消除输入数组顺序带来的错误，不修改原始map数据
+            const sortedList = [...changeList].sort((a,b)=>{
+                if(a.action === "DELETE") return -1;
+                if(b.action === "DELETE") return 1;
+                return 0;
+            });
+
             let curHas=aHas,curPart=null,curDesc=null,curMK=null;
-            for(const c of changeList){
+            for(const c of sortedList){
                 if(c.action==="DELETE"){
                     curHas=false;curPart=null;curDesc=null;curMK=null;
                 }else{
@@ -934,7 +942,7 @@
             if(e.target===mCheck) mCheck.style.display="none";
         };
 
-        // ====================物料归一化业务校验模块 V0.55‑rawStrMatch【修复版】====================
+        // ====================物料归一化业务校验模块 V0.55‑rawStrMatch====================
         function getRawResString(str){
             if(!str) return null;
             return str.trim();
@@ -1043,7 +1051,7 @@
                         })
                     }
                 }
-                //按精度分组，A/B两组原始字符串阻值集合【修复：去重后不同阻值>=2才告警】
+                //按精度分组，A/B两组原始字符串阻值集合
                 const byTol = groupBy(groupVal, x=>x.parsed.tolerance);
                 for(const tolGroup of Object.values(byTol)){
                     const hitA = tolGroup.filter(i=>RES_GROUP_A.has(i.parsed.resStr));
