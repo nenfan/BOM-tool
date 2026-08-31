@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOM修改项对比工具 V0.55‑rawStrMatch</title>
+    <title>BOM对比双入口工具 V0.55‑rawStrMatch</title>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         * {
@@ -37,53 +37,7 @@
         }
         .btn-primary:hover {
             background: #1d4ed8;
-            transform: translateY(-1px);
         }
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-        .btn-secondary {
-            background: #64748b;
-            color: white;
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-        .btn-secondary:hover {
-            background: #475569;
-        }
-        .btn-small {
-            padding:4px 10px;
-            font-size:12px;
-            border-radius:4px;
-        }
-        .tip-text {
-            color: #64748b;
-            font-size: 14px;
-            margin: 8px 0;
-        }
-        .version-tag {
-            display: inline-block;
-            background: #f97316;
-            color: white;
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-left: 8px;
-        }
-        .validation-tip {
-            color: #9ca3af;
-            font-size: 13px;
-            margin-top: 12px;
-            font-style: italic;
-        }
-        .warn-text{
-            color:#f59e0b;
-        }
-        .error-text{
-            color:#dc2626;
-        }
-
         .entry-page {
             min-height: 100vh;
             display: flex;
@@ -94,294 +48,118 @@
             padding: 20px;
         }
         .entry-title {
-            font-size: 32px;
+            font-size: 30px;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 16px;
+            margin-bottom:32px;
         }
-        .instruction-card {
-            max-width: 800px;
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            margin-bottom: 32px;
-            text-align: left;
+        .mode-card-wrap{
+            display:flex;
+            gap:24px;
+            flex-wrap:wrap;
+            justify-content:center;
         }
-        .instruction-card h3 {
-            font-size: 18px;
-            color: #1e293b;
-            margin-bottom: 16px;
+        .mode-card{
+            width:400px;
+            background:#fff;
+            border-radius:12px;
+            padding:24px;
+            box-shadow:0 4px 16px rgba(0,0,0,0.07);
+            text-align:left;
         }
-        .instruction-card ul {
-            padding-left: 20px;
-            margin-bottom: 16px;
+        .mode-card h3{
+            font-size:17px;
+            margin-bottom:10px;
         }
-        .instruction-card li {
-            margin-bottom: 8px;
-            color: #475569;
+        .mode-card p{
+            color:#555;
+            font-size:14px;
+            margin-bottom:18px;
         }
-
         .tool-page {
             display: none;
-            padding: 40px 0;
+            padding: 32px 0;
         }
-        .tool-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        .tool-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1e293b;
+        .tool-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:24px;
+            flex-wrap:wrap;
+            gap:12px;
         }
         .upload-section {
             display: flex;
-            gap: 24px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
+            gap:20px;
+            flex-wrap:wrap;
+            margin-bottom:30px;
         }
-        .upload-card {
-            flex: 1;
-            min-width: 420px;
-            background: white;
-            border-radius: 12px;
-            padding: 28px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        .upload-card{
+            flex:1;
+            min-width:400px;
+            background:#fff;
+            border-radius:10px;
+            padding:20px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.04);
         }
-        .upload-card h3 {
-            font-size: 18px;
-            color: #2563eb;
-            margin-bottom: 20px;
-        }
-        .file-upload-wrapper {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 16px;
-        }
-        .file-input {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 1;
-        }
-        .upload-btn {
-            display: inline-block;
-            padding: 12px 24px;
-            background: #2563eb;
-            color: white;
-            border-radius: 8px;
-            font-size: 15px;
-        }
-        .upload-hint {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 8px;
-        }
-        .file-status {
-            margin-top: 12px;
-            padding: 10px;
-            border-radius: 6px;
-            background: #f8fafc;
-            color: #475569;
-            font-size: 14px;
-        }
-        .progress-bar {
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 2px;
-            margin-top: 8px;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-fill {
-            height: 100%;
-            background: #2563eb;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .paste-block{
-            margin-top:20px;
-            border-top:1px solid #e5e7eb;
-            padding-top:16px;
-        }
-        .paste-block h4{
-            font-size:14px;
-            margin-bottom:8px;
-            color:#374151;
-        }
-        textarea.paste-ta{
-            width:100%;
-            min-height:120px;
-            border:1px solid #d1d5db;
+        .upload-btn-label{
+            display:inline-block;
+            background:#2563eb;
+            color:#fff;
+            padding:10px 18px;
             border-radius:6px;
-            padding:8px;
-            font-family:Consolas,monospace;
-            font-size:12px;
-            resize:vertical;
-        }
-        .paste-row{
-            margin-bottom:12px;
-        }
-        .paste-btn-bar{
-            display:flex;
-            gap:8px;
-            margin-top:6px;
-        }
-
-        .calc-section {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .calc-btn {
-            background: #dc2626;
-            color: white;
-            padding: 16px 48px;
-            border-radius: 8px;
-            font-size: 17px;
-            font-weight: 600;
-        }
-        .calc-btn:hover:not(:disabled) {
-            background: #b91c1c;
-        }
-        .calc-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-        }
-
-        .result-section {
-            background: white;
-            border-radius: 12px;
-            padding: 32px;
-            display: none;
-        }
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #f3f4f6;
-            flex-wrap: wrap;
-            gap:16px;
-        }
-        .result-title {
-            font-size: 18px;
-            font-weight: 600;
-        }
-        .btn-group {
-            display: flex;
-            gap: 12px;
-        }
-        .copy-btn {
-            background: #16a34a;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-        }
-        .download-btn {
-            background: #f97316;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-        }
-        .clear-btn {
-            background: #64748b;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-        }
-
-        .table-container {
-            max-height: 500px;
-            overflow-y: auto;
-            border:1px solid #e5e7eb;
-            border-radius:8px;
-        }
-        table {
-            width:100%;
-            border-collapse: collapse;
-            font-size:14px;
-        }
-        th {
-            background:#f9fafb;
-            padding:12px;
-            text-align:left;
-            border-bottom:2px solid #e5e7eb;
-        }
-        td {
-            padding:12px;
-            border-bottom:1px solid #f3f4f6;
-        }
-        .del-row td {
-            background:#fef2f2;
-            color:#b91c1c;
-        }
-        .add-row td {
-            background:#f0fdf4;
-            color:#15803d;
-        }
-        .empty-result {
-            text-align:center;
-            padding:40px;
-            color:#6b7280;
-        }
-
-        .toast {
-            position:fixed;
-            bottom:24px;
-            right:24px;
-            background:#1f2937;
-            color:white;
-            padding:12px 20px;
-            border-radius:8px;
-            opacity:0;
-            transition:0.3s;
-            z-index:9999;
-        }
-        .toast.show {
-            opacity:1;
-        }
-        .modal {
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,0.5);
-            display:none;
-            align-items:center;
-            justify-content:center;
-            z-index:999;
-        }
-        .modal-content {
-            width:90%;
-            max-width:800px;
-            max-height:90vh;
-            overflow-y:auto;
-            background:white;
-            border-radius:12px;
-            padding:28px;
-            position:relative;
-        }
-        .modal-close {
-            position:absolute;
-            top:16px;
-            right:16px;
-            font-size:22px;
             cursor:pointer;
         }
-        .preview-item {
-            font-family:Consolas,monospace;
-            font-size:12px;
-            margin:3px 0;
+        .upload-btn-label:hover{
+            background:#1d4ed8;
         }
+        .real-file-input{
+            display:none;
+        }
+        .file-status{
+            margin-top:10px;font-size:14px;
+        }
+        .paste-block{
+            margin-top:18px;border-top:1px solid #eee;padding-top:14px;
+        }
+        textarea.paste-ta{
+            width:100%;min-height:130px;
+            border:1px solid #d2d6dc;border-radius:6px;
+            padding:8px;font-family:Consolas;font-size:12px;resize:vertical;
+        }
+        .paste-row{margin-bottom:10px;}
+        .btn-small{
+            background:#64748b;color:#fff;
+            padding:4px 10px;font-size:12px;border-radius:4px;margin-right:6px;
+        }
+        .calc-section{text-align:center;margin-bottom:28px;}
+        .calc-btn{
+            background:#dc2626;color:#fff;
+            padding:14px 40px;font-size:16px;font-weight:bold;border-radius:8px;
+        }
+        .calc-btn:disabled{background:#9ca3af;cursor:not-allowed;}
+        .result-section{
+            background:#fff;border-radius:10px;padding:24px;display:none;
+        }
+        .result-header{
+            display:flex;justify-content:space-between;align-items:center;
+            margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #eee;
+            flex-wrap:wrap;gap:10px;
+        }
+        .copy-btn{background:#16a34a;color:white;padding:8px 16px;border-radius:6px;}
+        .download-btn{background:#f97316;color:white;padding:8px 16px;border-radius:6px;}
+        .clear-btn{background:#64748b;color:white;padding:8px 16px;border-radius:6px;}
+        .table-container{max-height:480px;overflow:auto;border:1px solid #e5e7eb;border-radius:6px;}
+        table{width:100%;border-collapse:collapse;font-size:13px;}
+        th{background:#f8fafc;padding:10px;text-align:left;border-bottom:1px solid #ddd;}
+        td{padding:10px;border-bottom:1px solid #f3f4f6;}
+        .del-row td{background:#fef2f2;color:#b91c1c;}
+        .add-row td{background:#f0fdf4;color:#15803d;}
+        .empty-result{text-align:center;padding:35px;color:#666;}
+        .toast{position:fixed;bottom:20px;right:20px;background:#222;color:#fff;padding:10px 18px;border-radius:6px;opacity:0;transition:0.25s;z-index:9999;}
+        .toast.show{opacity:1;}
+        .modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:998;}
+        .modal-content{background:#fff;width:90%;max-width:750px;max-height:85vh;overflow-y:auto;padding:24px;border-radius:10px;position:relative;}
+        .modal-close{position:absolute;top:12px;right:16px;font-size:22px;cursor:pointer;}
 
         /* =========业务校验弹窗样式========= */
         #businessCheckModal {
@@ -436,723 +214,881 @@
     </style>
 </head>
 <body>
-    <div class="entry-page container" id="entryPage">
-        <h1 class="entry-title">BOM修改项对比工具 <span class="version-tag">V0.55‑rawStrMatch</span></h1>
-        <div class="instruction-card">
-            <h3>使用说明</h3>
-            <ul>
-                <li>1.上传A→B、A→C的BOM修改项Excel，也支持文本粘贴录入变更；</li>
-                <li>2.粘贴格式：每行Tab分隔三列：物料描述	数量	位号列表；位号支持逗号分隔多个；</li>
-                <li>3.物料比对优先物料编码；编码为空则使用完整物料描述比对；</li>
-                <li>4.输出自动合并同类物料，统计位号总数量；</li>
-                <li>5.校验：单个位号最多允许1条ADD+1条DELETE；</li>
-                <li>6.新增物料归一化业务校验，阻值使用原始物料描述字符串比对，不做kΩ数值换算；</li>
-                <li>7.对比结果务必人工复核。</li>
-            </ul>
+<div class="entry-page container" id="entryPage">
+    <h1 class="entry-title">BOM对比工具【双入口】 V0.55‑rawStrMatch</h1>
+    <div class="mode-card-wrap">
+        <div class="mode-card">
+            <h3>功能一：A‑B变更 + A‑C变更 → B改C</h3>
+            <p>输入A→B、A→C两份变更清单，输出B相对C的修改项。兼容旧表格变更文件。</p>
+            <button class="btn-primary" onclick="enterTool('legacy')">进入功能一</button>
         </div>
-        <button class="btn-primary" onclick="enterTool()">进入工具</button>
+        <div class="mode-card">
+            <h3>功能二：基准BOM + 目标BOM → 修改项</h3>
+            <p>直接粘贴两份完整BOM，自动计算两份BOM之间差异修改项。<br><small>业务约束：单个位号只允许存在1颗物料</small></p>
+            <button class="btn-primary" onclick="enterTool('twobom')">进入功能二</button>
+        </div>
+    </div>
+</div>
+
+<div class="tool-page container" id="toolPage">
+    <div class="tool-header">
+        <div>
+            <h2 id="pageTitle">BOM对比</h2>
+            <div id="modeTip" style="font-size:14px;color:#555;"></div>
+        </div>
+        <div>
+            <button class="btn-small" onclick="backToEntry()">返回入口选择</button>
+        </div>
     </div>
 
-    <div class="tool-page container" id="toolPage">
-        <div class="tool-header">
-            <h2 class="tool-title">BOM修改项对比工具 <span class="version-tag">V0.55‑rawStrMatch</span></h2>
-            <button class="btn-secondary" onclick="openInstructionModal()">查看说明</button>
-        </div>
-
-        <div class="upload-section">
-            <div class="upload-card">
-                <h3>1.A→B 修改项</h3>
-                <div class="file-upload-wrapper">
-                    <button class="upload-btn">选择Excel文件</button>
-                    <input type="file" class="file-input" id="file-ab" accept=".xlsx,.xls" onchange="loadFile('ab',this)">
+    <!-- 功能一UI：4个粘贴区 AB/AC ADD DELETE -->
+    <div id="uiLegacy" class="upload-section">
+        <div class="upload-card">
+            <h3>A → B 变更</h3>
+            <label class="upload-btn-label" for="file‑ab‑leg">选择Excel变更文件</label>
+            <input class="real-file-input" id="file‑ab‑leg" accept=".xlsx,.xls" type="file" onchange="loadFile('ab',this)">
+            <div class="file-status" id="file‑ab‑status‑leg">未加载</div>
+            <div class="paste-block">
+                <div class="paste-row">
+                    <h4>A‑B ADD</h4>
+                    <textarea class="paste-ta" id="pasteAbAdd" oninput="checkCalcBtn()"></textarea>
                 </div>
-                <div class="file-status" id="file-ab-status">未选择文件</div>
-                <div class="progress-bar" id="progress-ab"><div class="progress-fill" id="progress-ab-fill"></div></div>
-                <div class="paste-block">
-                    <div class="paste-row">
-                        <h4>A→B DELETE粘贴区</h4>
-                        <textarea class="paste-ta" id="pasteAbDel" oninput="checkEnableCalcBtn()"></textarea>
-                    </div>
-                    <div class="paste-row">
-                        <h4>A→B ADD粘贴区</h4>
-                        <textarea class="paste-ta" id="pasteAbAdd" oninput="checkEnableCalcBtn()"></textarea>
-                    </div>
-                    <div class="paste-btn-bar">
-                        <button class="btn-secondary btn-small" onclick="previewPaste('ab')">预览粘贴解析</button>
-                        <button class="btn-secondary btn-small" onclick="clearPaste('ab')">清空A‑B粘贴</button>
-                    </div>
+                <div class="paste-row">
+                    <h4>A‑B DELETE</h4>
+                    <textarea class="paste-ta" id="pasteAbDel" oninput="checkCalcBtn()"></textarea>
                 </div>
-            </div>
-
-            <div class="upload-card">
-                <h3>2.A→C 修改项</h3>
-                <div class="file-upload-wrapper">
-                    <button class="upload-btn">选择Excel文件</button>
-                    <input type="file" class="file-input" id="file-ac" accept=".xlsx,.xls" onchange="loadFile('ac',this)">
-                </div>
-                <div class="file-status" id="file-ac-status">未选择文件</div>
-                <div class="progress-bar" id="progress-ac"><div class="progress-fill" id="progress-ac-fill"></div></div>
-                <div class="paste-block">
-                    <div class="paste-row">
-                        <h4>A→C DELETE粘贴区</h4>
-                        <textarea class="paste-ta" id="pasteAcDel" oninput="checkEnableCalcBtn()"></textarea>
-                    </div>
-                    <div class="paste-row">
-                        <h4>A→C ADD粘贴区</h4>
-                        <textarea class="paste-ta" id="pasteAcAdd" oninput="checkEnableCalcBtn()"></textarea>
-                    </div>
-                    <div class="paste-btn-bar">
-                        <button class="btn-secondary btn-small" onclick="previewPaste('ac')">预览粘贴解析</button>
-                        <button class="btn-secondary btn-small" onclick="clearPaste('ac')">清空A‑C粘贴</button>
-                    </div>
+                <div>
+                    <button class="btn-small" onclick="previewPaste('ab')">预览解析</button>
+                    <button class="btn-small" onclick="clearPaste('ab')">清空</button>
                 </div>
             </div>
         </div>
-
-        <div class="calc-section">
-            <button class="calc-btn" id="calc-btn" disabled onclick="computeResult()">计算 B→C 修改项</button>
-        </div>
-
-        <div class="result-section" id="resultSection">
-            <div class="result-header">
-                <h3 class="result-title">B→C对比结果</h3>
-                <div class="btn-group">
-                    <button class="copy-btn" onclick="copyTable()">复制结果</button>
-                    <button class="download-btn" onclick="exportExcel()">导出Excel</button>
-                    <button class="clear-btn" onclick="clearAllData()">清空全部</button>
+        <div class="upload-card">
+            <h3>A → C 变更</h3>
+            <label class="upload-btn-label" for="file‑ac‑leg">选择Excel变更文件</label>
+            <input class="real-file-input" id="file‑ac‑leg" accept=".xlsx,.xls" type="file" onchange="loadFile('ac',this)">
+            <div class="file-status" id="file‑ac‑status‑leg">未加载</div>
+            <div class="paste-block">
+                <div class="paste-row">
+                    <h4>A‑C ADD</h4>
+                    <textarea class="paste-ta" id="pasteAcAdd" oninput="checkCalcBtn()"></textarea>
                 </div>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>物料编码</th><th>物料描述</th><th>位号</th><th>操作</th><th>数量</th><th>备注</th></tr>
-                    </thead>
-                    <tbody id="resultBody"></tbody>
-                </table>
+                <div class="paste-row">
+                    <h4>A‑C DELETE</h4>
+                    <textarea class="paste-ta" id="pasteAcDel" oninput="checkCalcBtn()"></textarea>
+                </div>
+                <div>
+                    <button class="btn-small" onclick="previewPaste('ac')">预览解析</button>
+                    <button class="btn-small" onclick="clearPaste('ac')">清空</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="instructionModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <h3>工具说明</h3>
-            <ul style="padding-left:20px;margin-top:10px;">
-                <li>粘贴每行Tab分隔三列：物料描述	数量	位号列表；中间数量仅格式校验，不参与运算；</li>
-                <li>粘贴有内容，则计算时使用粘贴数据；粘贴全空沿用Excel；</li>
-                <li>输出"数量"为合并后位号总个数，来自位号统计，不是粘贴输入的数字。</li>
-                <li>业务校验：阻值使用原始物料描述字符串比对，不做kΩ数值换算。</li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="modal" id="previewModal">
-        <div class="modal-content">
-            <span class="modal-close" onclick="closePreviewModal()">&times;</span>
-            <h3>粘贴解析预览</h3>
-            <div id="previewBody"></div>
-        </div>
-    </div>
-
-    <div class="toast" id="toast"></div>
-
-    <!-- 物料归一化业务校验弹窗 -->
-    <div id="businessCheckModal">
-        <div class="modal-inner">
-            <div class="header">
-                <h3>物料归一化业务校验清单</h3>
-                <button class="close-btn" id="closeCheckModal">关闭</button>
+    <!-- 功能二UI：仅基准BOM、目标BOM，无DELETE框 -->
+    <div id="uiTwoBom" class="upload-section" style="display:none;">
+        <div class="upload-card">
+            <h3>基准BOM</h3>
+            <label class="upload-btn-label" for="file‑ab‑tb">选择Excel完整BOM</label>
+            <input class="real-file-input" id="file‑ab‑tb" accept=".xlsx,.xls" type="file" onchange="loadFile('ab',this)">
+            <div class="file-status" id="file‑ab‑status‑tb">未加载</div>
+            <div class="paste-block">
+                <div class="paste-row">
+                    <h4>粘贴完整基准BOM</h4>
+                    <textarea class="paste-ta" id="pasteAbAddTb" oninput="checkCalcBtn()"></textarea>
+                </div>
+                <div>
+                    <button class="btn-small" onclick="previewPaste('ab')">预览解析</button>
+                    <button class="btn-small" onclick="clearPaste('ab')">清空</button>
+                </div>
             </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="60">等级</th>
-                            <th width="240">告警分类说明</th>
-                            <th>关键参数信息</th>
-                            <th width="220">涉及位号</th>
-                        </tr>
-                    </thead>
-                    <tbody id="checkResultBody"></tbody>
-                </table>
+        </div>
+        <div class="upload-card">
+            <h3>目标BOM</h3>
+            <label class="upload-btn-label" for="file‑ac‑tb">选择Excel完整BOM</label>
+            <input class="real-file-input" id="file‑ac‑tb" accept=".xlsx,.xls" type="file" onchange="loadFile('ac',this)">
+            <div class="file-status" id="file‑ac‑status‑tb">未加载</div>
+            <div class="paste-block">
+                <div class="paste-row">
+                    <h4>粘贴完整目标BOM</h4>
+                    <textarea class="paste-ta" id="pasteAcAddTb" oninput="checkCalcBtn()"></textarea>
+                </div>
+                <div>
+                    <button class="btn-small" onclick="previewPaste('ac')">预览解析</button>
+                    <button class="btn-small" onclick="clearPaste('ac')">清空</button>
+                </div>
             </div>
-            <div class="tip">提示：仅业务建议，不会修改B‑C计算结果，请工程师人工评估处理</div>
         </div>
     </div>
 
-    <script>
-        let abMap = new Map();
-        let acMap = new Map();
-        const LocUtils = {
-            split: s=>s?s.split(/[,，\s]+/).filter(x=>x):[],
-            merge: arr=>arr.sort().join(",")
-        };
+    <div class="calc-section">
+        <button class="calc-btn" id="calc-btn" disabled onclick="computeResult()">计算修改项</button>
+    </div>
 
-        function getMaterialKey(item){
-            const pn=(item.partNum||"").trim();
-            const desc=(item.partDesc||"").trim();
-            if(pn) return "PN::"+pn;
-            if(desc) return "DESC::"+desc;
-            return "NO_MATERIAL_KEY";
+    <div class="result-section" id="resultSection">
+        <div class="result-header">
+            <h3>输出结果</h3>
+            <div>
+                <button class="copy-btn" onclick="copyResult()">复制表格</button>
+                <button class="download-btn" onclick="exportXlsx()">导出Excel</button>
+                <button class="clear-btn" onclick="clearAll()">全部清空</button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>物料编码</th><th>物料描述</th><th>位号</th><th>操作</th><th>数量</th><th>备注</th></tr>
+                </thead>
+                <tbody id="resultBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="previewModal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="closePreviewModal()">&times;</span>
+        <h4>粘贴解析预览</h4>
+        <div id="previewBody" style="margin-top:12px;font-family:Consolas;font-size:12px;"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 物料归一化业务校验弹窗 -->
+<div id="businessCheckModal">
+    <div class="modal-inner">
+        <div class="header">
+            <h3>物料归一化业务校验清单</h3>
+            <button class="close-btn" id="closeCheckModal">关闭</button>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th width="60">等级</th>
+                        <th width="240">告警分类说明</th>
+                        <th>关键参数信息</th>
+                        <th width="260">涉及位号</th>
+                    </tr>
+                </thead>
+                <tbody id="checkResultBody"></tbody>
+            </table>
+        </div>
+        <div class="tip">提示：仅业务建议，不会修改B‑C计算结果，请工程师人工评估处理</div>
+    </div>
+</div>
+
+<script>
+let abMap = new Map();
+let acMap = new Map();
+let currentMode = "";
+
+const LocUtil = {
+    split(s){ return (s||"").split(/[,，\s]+/).filter(x=>x.trim()) },
+    merge(arr){ return [...new Set(arr)].sort().join(",") }
+};
+
+function getMaterialKey(item){
+    const pn = (item.partNum||"").trim();
+    const desc = (item.partDesc||"").trim();
+    if(pn) return "PN::"+pn;
+    if(desc) return "DESC::"+desc;
+    return "EMPTY";
+}
+
+/**
+ * 业务校验：twobom模式，一个位号只能有1条ADD物料
+ */
+function validateSingleLocOnePart(map, sourceName){
+    if(currentMode !== "twobom") return true;
+    for(const [loc, itemList] of map.entries()){
+        const addItems = itemList.filter(x=>x.action === "ADD");
+        if(addItems.length > 1){
+            throw new Error(`【${sourceName}】位号 ${loc} 同时存在多颗物料，业务不允许！`);
         }
+    }
+    return true;
+}
 
-        function enterTool(){
-            document.getElementById("entryPage").style.display="none";
-            document.getElementById("toolPage").style.display="block";
-            checkEnableCalcBtn();
-        }
+function enterTool(mode){
+    currentMode = mode;
+    abMap.clear();acMap.clear();
+    document.getElementById("entryPage").style.display="none";
+    document.getElementById("toolPage").style.display="block";
 
-        function showToast(text,dur=3500){
-            const t=document.getElementById("toast");
-            t.textContent=text;
-            t.classList.add("show");
-            setTimeout(()=>t.classList.remove("show"),dur);
-        }
-        function openInstructionModal(){document.getElementById("instructionModal").style.display="flex";}
-        function closeModal(){document.getElementById("instructionModal").style.display="none";}
-        function closePreviewModal(){document.getElementById("previewModal").style.display="none";}
+    document.getElementById("file‑ab‑leg").value="";
+    document.getElementById("file‑ac‑leg").value="";
+    document.getElementById("file‑ab‑tb").value="";
+    document.getElementById("file‑ac‑tb").value="";
 
-        function loadFile(type,input){
-            const file=input.files[0];
-            if(!file) return;
-            const progressBar=document.getElementById(`progress-${type}`);
-            const progressFill=document.getElementById(`progress-${type}-fill`);
-            const statusEl=document.getElementById(`file-${type}-status`);
-            progressBar.style.display="block";
-            progressFill.style.width="20%";
-            statusEl.textContent=`正在读取：${file.name}`;
+    document.getElementById("pasteAbAdd").value="";
+    document.getElementById("pasteAbDel").value="";
+    document.getElementById("pasteAcAdd").value="";
+    document.getElementById("pasteAcDel").value="";
+    document.getElementById("pasteAbAddTb").value="";
+    document.getElementById("pasteAcAddTb").value="";
 
-            const reader=new FileReader();
-            reader.onload=e=>{
-                try{
-                    progressFill.style.width="60%";
-                    const wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
-                    progressFill.style.width="80%";
-                    const json=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-                    const head=json[0].map(c=>(c+"").toLowerCase());
-                    const idx={
-                        pn:head.findIndex(h=>h.includes("物料编码")||h.includes("料号")),
-                        desc:head.findIndex(h=>h.includes("物料描述")),
-                        loc:head.findIndex(h=>h.includes("位号")),
-                        act:head.findIndex(h=>h.includes("操作"))
-                    };
-                    if(idx.pn===-1||idx.loc===-1||idx.act===-1) throw new Error("缺少物料编码/位号/操作列");
-                    const tempMap=new Map();
-                    const checkStat=new Map();
-                    for(let i=1;i<json.length;i++){
-                        const r=json[i];
-                        if(!r[idx.pn]&&!r[idx.loc]&&!r[idx.act]) continue;
-                        const act=(r[idx.act]+"").trim().toUpperCase();
-                        if(!["ADD","DELETE","DEL"].includes(act)) continue;
-                        const realAct=act==="DEL"?"DELETE":act;
-                        const rawPn=(r[idx.pn]??"").toString().trim();
-                        const rawDesc=(r[idx.desc]??"").toString().trim()||"无描述";
-                        const locs=LocUtils.split(r[idx.loc]+"");
-                        locs.forEach(loc=>{
-                            const l=loc.trim();
-                            const item={partNum:rawPn,partDesc:rawDesc,loc:l,action:realAct};
-                            if(!tempMap.has(l)) tempMap.set(l,[]);
-                            tempMap.get(l).push(item);
-                            if(!checkStat.has(l)) checkStat.set(l,{addCnt:0,delCnt:0});
-                            const st=checkStat.get(l);
-                            if(realAct==="ADD") st.addCnt++;
-                            if(realAct==="DELETE") st.delCnt++;
-                        });
-                    }
-                    for(const [loc,st] of checkStat){
-                        if(st.addCnt>1) throw new Error(`位号${loc}多条ADD`);
-                        if(st.delCnt>1) throw new Error(`位号${loc}多条DELETE`);
-                    }
-                    if(type==="ab") abMap=tempMap; else acMap=tempMap;
-                    progressFill.style.width="100%";
-                    const total=Array.from(tempMap.values()).reduce((s,arr)=>s+arr.length,0);
-                    statusEl.textContent=`✅已加载 ${file.name} (${total}条)`;
-                    setTimeout(()=>{progressBar.style.display="none";progressFill.style.width="0%";},600);
-                    checkEnableCalcBtn();
-                    showToast("文件加载成功");
-                }catch(err){
-                    progressBar.style.display="none";
-                    statusEl.innerHTML=`<span style="color:red">❌${err.message}</span>`;
-                    showToast(err.message,5000);
-                }
+    document.getElementById("file‑ab‑status‑leg").innerText="未加载";
+    document.getElementById("file‑ac‑status‑leg").innerText="未加载";
+    document.getElementById("file‑ab‑status‑tb").innerText="未加载";
+    document.getElementById("file‑ac‑status‑tb").innerText="未加载";
+
+    document.getElementById("resultSection").style.display="none";
+
+    if(mode === "legacy"){
+        document.getElementById("uiLegacy").style.display="flex";
+        document.getElementById("uiTwoBom").style.display="none";
+        document.getElementById("pageTitle").innerText="功能一：A‑B + A‑C → B改C";
+        document.getElementById("modeTip").innerText="模式：两份变更清单，输出B相对C修改项";
+    }else{
+        document.getElementById("uiLegacy").style.display="none";
+        document.getElementById("uiTwoBom").style.display="flex";
+        document.getElementById("pageTitle").innerText="功能二：基准BOM + 目标BOM → 修改项";
+        document.getElementById("modeTip").innerText="模式：两份完整BOM直接对比；约束：单个位号只能1颗物料";
+    }
+    checkCalcBtn();
+}
+function backToEntry(){
+    document.getElementById("toolPage").style.display="none";
+    document.getElementById("entryPage").style.display="flex";
+    currentMode = "";
+}
+
+function showToast(text){
+    const t = document.getElementById("toast");
+    t.innerText = text;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+//文件读取
+function loadFile(type,input){
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = e=>{
+        try{
+            const wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+            const head = json[0].map(c=>(c+"").toLowerCase());
+            const idx = {
+                pn: head.findIndex(h=>h.includes("物料编码")||h.includes("料号")),
+                desc: head.findIndex(h=>h.includes("物料描述")),
+                loc: head.findIndex(h=>h.includes("位号")),
+                act: head.findIndex(h=>h.includes("操作"))
             };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function parsePasteText(rawText,action,srcName){
-            const lines=rawText.split(/\r?\n/);
-            const items=[];
-            for(let i=0;i<lines.length;i++){
-                const line=lines[i].trim();
-                if(!line) continue;
-                const cols=line.split("\t");
-                if(cols.length<3) throw new Error(`${srcName}第${i+1}行，需要Tab分隔3列`);
-                const desc=cols[0].trim();
-                const locRaw=cols[2].trim();
-                const locList=LocUtils.split(locRaw);
-                for(const loc of locList){
-                    items.push({partNum:"",partDesc:desc,loc:loc,action:action});
-                }
+            if(idx.pn<0||idx.loc<0||idx.act<0) throw new Error("缺少物料编码/位号/操作列");
+            const tmpMap = new Map();
+            for(let i=1;i<json.length;i++){
+                const r = json[i];
+                const act = (r[idx.act]||"").toString().trim().toUpperCase();
+                if(!["ADD","DELETE","DEL"].includes(act)) continue;
+                const realAct = act==="DEL"?"DELETE":act;
+                const pn = (r[idx.pn]||"").toString().trim();
+                const desc = (r[idx.desc]||"无描述").toString().trim();
+                const locs = LocUtil.split(r[idx.loc]+"");
+                locs.forEach(loc=>{
+                    if(!tmpMap.has(loc)) tmpMap.set(loc,[]);
+                    tmpMap.get(loc).push({partNum:pn,partDesc:desc,loc,action:realAct});
+                })
             }
-            return items;
-        }
-
-        function buildMapFromPaste(delText,addText,srcName){
-            const delItems=parsePasteText(delText,"DELETE",srcName+"‑DEL");
-            const addItems=parsePasteText(addText,"ADD",srcName+"‑ADD");
-            const all=[...delItems,...addItems];
-            const tempMap=new Map();
-            const checkStat=new Map();
-            for(const it of all){
-                if(!tempMap.has(it.loc)) tempMap.set(it.loc,[]);
-                tempMap.get(it.loc).push(it);
-                if(!checkStat.has(it.loc)) checkStat.set(it.loc,{addCnt:0,delCnt:0});
-                const st=checkStat.get(it.loc);
-                if(it.action==="ADD") st.addCnt++;
-                if(it.action==="DELETE") st.delCnt++;
-            }
-            for(const [loc,st] of checkStat){
-                if(st.addCnt>1) throw new Error(`${srcName}粘贴：位号${loc}多条ADD`);
-                if(st.delCnt>1) throw new Error(`${srcName}粘贴：位号${loc}多条DELETE`);
-            }
-            return {map:tempMap,delItems,addItems};
-        }
-
-        function previewPaste(side){
-            try{
-                let delTa,addTa,label;
-                if(side==="ab"){
-                    delTa=document.getElementById("pasteAbDel");
-                    addTa=document.getElementById("pasteAbAdd");
-                    label="A‑B";
-                }else{
-                    delTa=document.getElementById("pasteAcDel");
-                    addTa=document.getElementById("pasteAcAdd");
-                    label="A‑C";
-                }
-                const dTxt=delTa.value,aTxt=addTa.value;
-                if(!dTxt.trim()&&!aTxt.trim()){showToast(label+"粘贴为空");return;}
-                const ret=buildMapFromPaste(dTxt,aTxt,label);
-                let html=`<p>${label} 解析：DELETE=${ret.delItems.length} ADD=${ret.addItems.length}</p><hr>`;
-                html+="<div><b>DELETE</b></div>";
-                ret.delItems.forEach(x=>html+=`<div class="preview-item">[DEL] ${x.partDesc} | ${x.loc}</div>`);
-                html+="<div style='margin-top:8px'><b>ADD</b></div>";
-                ret.addItems.forEach(x=>html+=`<div class="preview-item">[ADD] ${x.partDesc} | ${x.loc}</div>`);
-                document.getElementById("previewBody").innerHTML=html;
-                document.getElementById("previewModal").style.display="flex";
-            }catch(e){showToast(e.message,6000);}
-        }
-
-        function clearPaste(side){
-            if(side==="ab"){
-                document.getElementById("pasteAbDel").value="";
-                document.getElementById("pasteAbAdd").value="";
+            validateSingleLocOnePart(tmpMap, type==="ab"?"基准BOM":"目标BOM");
+            if(type==="ab") abMap = tmpMap; else acMap = tmpMap;
+            const total = Array.from(tmpMap.values()).reduce((s,arr)=>s+arr.length,0);
+            if(currentMode==="legacy"){
+                document.getElementById(`file‑${type}‑status‑leg`).innerText=`✅已加载 ${file.name} (${total}条)`;
             }else{
-                document.getElementById("pasteAcDel").value="";
-                document.getElementById("pasteAcAdd").value="";
+                document.getElementById(`file‑${type}‑status‑tb`).innerText=`✅已加载 ${file.name} (${total}条)`;
             }
-            checkEnableCalcBtn();
-            showToast("已清空粘贴");
-        }
-
-        function applyPasteData(){
-            const abD=document.getElementById("pasteAbDel").value.trim();
-            const abA=document.getElementById("pasteAbAdd").value.trim();
-            if(abD||abA){
-                const r=buildMapFromPaste(abD,abA,"A‑B");
-                abMap=r.map;
+            showToast("文件读取成功");
+            checkCalcBtn();
+        }catch(err){
+            if(currentMode==="legacy"){
+                document.getElementById(`file‑${type}‑status‑leg`).innerHTML=`<span style="color:red">❌${err.message}</span>`;
+            }else{
+                document.getElementById(`file‑${type}‑status‑tb`).innerHTML=`<span style="color:red">❌${err.message}</span>`;
             }
-            const acD=document.getElementById("pasteAcDel").value.trim();
-            const acA=document.getElementById("pasteAcAdd").value.trim();
-            if(acD||acA){
-                const r=buildMapFromPaste(acD,acA,"A‑C");
-                acMap=r.map;
+            showToast(err.message);
+        }
+    }
+    reader.readAsArrayBuffer(file);
+}
+
+//粘贴解析
+function parsePasteLine(text,action,src){
+    const lines = text.split(/\r?\n/);
+    const out = [];
+    for(let i=0;i<lines.length;i++){
+        const line = lines[i].trim();
+        if(!line) continue;
+        const cols = line.split("\t");
+        if(cols.length<3) throw new Error(`${src}第${i+1}行格式错误，需要Tab分隔3列`);
+        const desc = cols[0].trim();
+        const locArr = LocUtil.split(cols[2]);
+        locArr.forEach(loc=>{
+            out.push({partNum:"",partDesc:desc,loc,action})
+        })
+    }
+    return out;
+}
+
+function buildMap(addText,delText,srcName){
+    const addList = addText ? parsePasteLine(addText,"ADD",srcName+"‑ADD") : [];
+    const delList = delText ? parsePasteLine(delText,"DELETE",srcName+"‑DEL") : [];
+    const all = [...addList,...delList];
+    const map = new Map();
+    all.forEach(it=>{
+        if(!map.has(it.loc)) map.set(it.loc,[]);
+        map.get(it.loc).push(it);
+    })
+    validateSingleLocOnePart(map,srcName);
+    return {map,addList,delList};
+}
+
+function previewPaste(side){
+    try{
+        let addEl,delEl,name;
+        if(currentMode==="legacy"){
+            if(side==="ab"){
+                addEl = document.getElementById("pasteAbAdd");
+                delEl = document.getElementById("pasteAbDel");
+            }else{
+                addEl = document.getElementById("pasteAcAdd");
+                delEl = document.getElementById("pasteAcDel");
+            }
+        }else{
+            if(side==="ab"){
+                addEl = document.getElementById("pasteAbAddTb");
+                delEl = {value:""};
+            }else{
+                addEl = document.getElementById("pasteAcAddTb");
+                delEl = {value:""};
             }
         }
+        name = side.toUpperCase();
+        const addTxt = addEl.value;
+        const delTxt = delEl.value;
+        if(!addTxt.trim()&&!delTxt.trim()){showToast("粘贴内容为空");return;}
+        const res = buildMap(addTxt,delTxt,name);
+        let html = `<div>ADD:${res.addList.length}  DELETE:${res.delList.length}</div><hr>`;
+        res.addList.forEach(x=>html+=`<div>[ADD] ${x.partDesc} | ${x.loc}</div>`);
+        res.delList.forEach(x=>html+=`<div>[DELETE] ${x.partDesc} | ${x.loc}</div>`);
+        document.getElementById("previewBody").innerHTML = html;
+        document.getElementById("previewModal").style.display="flex";
+    }catch(e){showToast(e.message)}
+}
+function closePreviewModal(){document.getElementById("previewModal").style.display="none";}
 
-        function checkEnableCalcBtn(){
-            const abDel=document.getElementById("pasteAbDel").value.trim();
-            const abAdd=document.getElementById("pasteAbAdd").value.trim();
-            const acDel=document.getElementById("pasteAcDel").value.trim();
-            const acAdd=document.getElementById("pasteAcAdd").value.trim();
-
-            const hasAbSource = abMap.size>0 || (abDel.length>0 || abAdd.length>0);
-            const hasAcSource = acMap.size>0 || (acDel.length>0 || acAdd.length>0);
-
-            document.getElementById("calc-btn").disabled = !(hasAbSource && hasAcSource);
-        }
-
-        function clearAllData(){
-            abMap.clear();acMap.clear();
-            document.getElementById("file-ab").value="";
-            document.getElementById("file-ac").value="";
-            document.getElementById("pasteAbDel").value="";
+function clearPaste(side){
+    if(currentMode==="legacy"){
+        if(side==="ab"){
             document.getElementById("pasteAbAdd").value="";
-            document.getElementById("pasteAcDel").value="";
+            document.getElementById("pasteAbDel").value="";
+        }else{
             document.getElementById("pasteAcAdd").value="";
-            document.getElementById("file-ab-status").textContent="未选择文件";
-            document.getElementById("file-ac-status").textContent="未选择文件";
-            document.getElementById("resultSection").style.display="none";
-            checkEnableCalcBtn();
-            showToast("全部已清空");
+            document.getElementById("pasteAcDel").value="";
         }
+    }else{
+        if(side==="ab"){
+            document.getElementById("pasteAbAddTb").value="";
+        }else{
+            document.getElementById("pasteAcAddTb").value="";
+        }
+    }
+    checkCalcBtn();
+    showToast("已清空粘贴");
+}
 
-        function simulate(changeList){
-            if(!changeList||!changeList.length) return {aHas:null,finalHas:null,finalPart:null,finalDesc:null,materialKey:null};
-            const hasDel=changeList.some(c=>c.action==="DELETE");
-            const allAdd=changeList.every(c=>c.action==="ADD");
-            let aHas;
-            if(hasDel) aHas=true;
-            else if(allAdd) aHas=false;
-            else aHas=null;
+//把粘贴数据合并进map
+function mergePasteToMap(){
+    if(currentMode === "legacy"){
+        const abA = document.getElementById("pasteAbAdd").value.trim();
+        const abD = document.getElementById("pasteAbDel").value.trim();
+        if(abA||abD){
+            const r = buildMap(abA,abD,"A‑B");
+            abMap = r.map;
+        }
+        const acA = document.getElementById("pasteAcAdd").value.trim();
+        const acD = document.getElementById("pasteAcDel").value.trim();
+        if(acA||acD){
+            const r = buildMap(acA,acD,"A‑C");
+            acMap = r.map;
+        }
+    }else{
+        //功能二：只有ADD，DEL强制空
+        const abA = document.getElementById("pasteAbAddTb").value.trim();
+        if(abA){
+            const r = buildMap(abA,"","基准BOM");
+            abMap = r.map;
+        }
+        const acA = document.getElementById("pasteAcAddTb").value.trim();
+        if(acA){
+            const r = buildMap(acA,"","目标BOM");
+            acMap = r.map;
+        }
+    }
+}
 
-            //修复BUG：仿真内部强制排序，DELETE优先执行，消除输入数组顺序带来的错误，不修改原始map数据
-            const sortedList = [...changeList].sort((a,b)=>{
-                if(a.action === "DELETE") return -1;
-                if(b.action === "DELETE") return 1;
-                return 0;
-            });
+function checkCalcBtn(){
+    let abAdd,acAdd,abDel,acDel;
+    if(currentMode==="legacy"){
+        abAdd = document.getElementById("pasteAbAdd").value.trim();
+        acAdd = document.getElementById("pasteAcAdd").value.trim();
+        abDel = document.getElementById("pasteAbDel").value.trim();
+        acDel = document.getElementById("pasteAcDel").value.trim();
+    }else{
+        abAdd = document.getElementById("pasteAbAddTb").value.trim();
+        acAdd = document.getElementById("pasteAcAddTb").value.trim();
+        abDel="";acDel="";
+    }
+    const hasAB = abMap.size>0 || abAdd || abDel;
+    const hasAC = acMap.size>0 || acAdd || acDel;
+    document.getElementById("calc-btn").disabled = !(hasAB && hasAC);
+}
 
-            let curHas=aHas,curPart=null,curDesc=null,curMK=null;
-            for(const c of sortedList){
-                if(c.action==="DELETE"){
-                    curHas=false;curPart=null;curDesc=null;curMK=null;
-                }else{
-                    curHas=true;curPart=c.partNum;curDesc=c.partDesc;curMK=getMaterialKey(c);
-                }
+function clearAll(){
+    abMap.clear();acMap.clear();
+    document.getElementById("file‑ab‑leg").value="";
+    document.getElementById("file‑ac‑leg").value="";
+    document.getElementById("file‑ab‑tb").value="";
+    document.getElementById("file‑ac‑tb").value="";
+
+    document.getElementById("pasteAbAdd").value="";
+    document.getElementById("pasteAbDel").value="";
+    document.getElementById("pasteAcAdd").value="";
+    document.getElementById("pasteAcDel").value="";
+    document.getElementById("pasteAbAddTb").value="";
+    document.getElementById("pasteAcAddTb").value="";
+
+    document.getElementById("file‑ab‑status‑leg").innerText="未加载";
+    document.getElementById("file‑ac‑status‑leg").innerText="未加载";
+    document.getElementById("file‑ab‑status‑tb").innerText="未加载";
+    document.getElementById("file‑ac‑status‑tb").innerText="未加载";
+
+    document.getElementById("resultSection").style.display="none";
+    checkCalcBtn();
+    showToast("全部清空");
+}
+
+//仿真单颗位号经过变更之后最终状态
+function simulateLoc(changeList){
+    let hasDel = changeList.some(c=>c.action==="DELETE");
+    let allAdd = changeList.every(c=>c.action==="ADD");
+    let aHas = null;
+    if(hasDel) aHas = true;
+    if(allAdd) aHas = false;
+
+    const sorted = [...changeList].sort((a,b)=> a.action==="DELETE"?-1:1);
+    let curHas = aHas;
+    let curPn = null,curDesc=null,curKey=null;
+    for(const c of sorted){
+        if(c.action === "DELETE"){
+            curHas = false;curPn=null;curDesc=null;curKey=null;
+        }else{
+            curHas = true;curPn=c.partNum;curDesc=c.partDesc;curKey=getMaterialKey(c);
+        }
+    }
+    return {aHas,finalHas:curHas,pn:curPn,desc:curDesc,key:curKey};
+}
+
+//核心计算
+function computeResult(){
+    try{
+        mergePasteToMap();
+    }catch(e){
+        showToast("解析校验失败："+e.message);
+        return;
+    }
+    const allLoc = new Set([...abMap.keys(),...acMap.keys()]);
+    const diffList = [];
+
+    for(const loc of allLoc){
+        const abChg = abMap.get(loc)||[];
+        const acChg = acMap.get(loc)||[];
+        const simB = simulateLoc(abChg);
+        const simC = simulateLoc(acChg);
+
+        //推断A状态
+        let A_has;
+        if(simB.aHas!==null) A_has = simB.aHas;
+        else if(simC.aHas!==null) A_has = simC.aHas;
+        else A_has = true;
+
+        //取A原始物料（从DELETE记录拿）
+        const abDel = abChg.find(x=>x.action==="DELETE");
+        const acDel = acChg.find(x=>x.action==="DELETE");
+        const A_pn = abDel?abDel.partNum : (acDel?acDel.partNum:"");
+        const A_desc = abDel?abDel.partDesc : (acDel?acDel.partDesc:"");
+        const A_key = getMaterialKey({partNum:A_pn,partDesc:A_desc});
+
+        //B状态
+        let B_has = simB.finalHas!==null ? simB.finalHas : A_has;
+        let B_pn = simB.pn, B_desc=simB.desc, B_key=simB.key;
+        if(B_has && !B_key) { B_pn=A_pn; B_desc=A_desc; B_key=A_key; }
+
+        //C状态
+        let C_has = simC.finalHas!==null ? simC.finalHas : A_has;
+        let C_pn = simC.pn, C_desc=simC.desc, C_key=simC.key;
+        if(C_has && !C_key) { C_pn=A_pn; C_desc=A_desc; C_key=A_key; }
+
+        //判断差异
+        if(B_has && !C_has){
+            diffList.push({partNum:B_pn||"",partDesc:B_desc||"",loc,action:"DELETE",remark:""});
+        }else if(!B_has && C_has){
+            diffList.push({partNum:C_pn||"",partDesc:C_desc||"",loc,action:"ADD",remark:""});
+        }else if(B_has && C_has){
+            if(B_key !== C_key){
+                diffList.push({partNum:B_pn||"",partDesc:B_desc||"",loc,action:"DELETE",remark:"物料替换"});
+                diffList.push({partNum:C_pn||"",partDesc:C_desc||"",loc,action:"ADD",remark:"物料替换"});
             }
-            return {aHas,finalHas:curHas,finalPart:curPart,finalDesc:curDesc,materialKey:curMK};
         }
+    }
 
-        function computeResult(){
-            try{applyPasteData();}catch(e){showToast("粘贴解析失败："+e.message,6000);return;}
-            const allLoc=new Set([...abMap.keys(),...acMap.keys()]);
-            const res=[];
-            for(const loc of allLoc){
-                const abChg=abMap.get(loc)||[];
-                const acChg=acMap.get(loc)||[];
-                const simB=simulate(abChg);
-                const simC=simulate(acChg);
-                let A_has;
-                if(simB.aHas!==null) A_has=simB.aHas;
-                else if(simC.aHas!==null) A_has=simC.aHas;
-                else A_has=true;
+    //同位号合并，聚合位号
+    const groupMap = new Map();
+    for(const item of diffList){
+        const gk = `${item.action}|${item.partNum}|${item.partDesc}|${item.remark}`;
+        if(!groupMap.has(gk)) groupMap.set(gk,{...item,locs:[]});
+        groupMap.get(gk).locs.push(item.loc);
+    }
+    const output = Array.from(groupMap.values()).map(g=>({
+        partNum:g.partNum,
+        partDesc:g.partDesc,
+        loc:LocUtil.merge(g.locs),
+        action:g.action,
+        qty:g.locs.length,
+        remark:g.remark
+    }));
 
-                let A_pn="",A_desc="";
-                const abDel=abChg.find(x=>x.action==="DELETE");
-                const acDel=acChg.find(x=>x.action==="DELETE");
-                if(abDel){A_pn=abDel.partNum;A_desc=abDel.partDesc;}
-                else if(acDel){A_pn=acDel.partNum;A_desc=acDel.partDesc;}
-                const A_mk=getMaterialKey({partNum:A_pn,partDesc:A_desc});
+    // =====两种模式都执行业务校验=====
+    const checkList = runBusinessCheck(output);
+    if(checkList.length>0){
+        renderCheckModal(checkList);
+    }
 
-                let B_has=simB.finalHas!==null?simB.finalHas:A_has;
-                let B_p=simB.finalPart,B_d=simB.finalDesc,B_mk=simB.materialKey;
-                if(B_has&&B_mk===null){B_p=A_pn;B_d=A_desc;B_mk=A_mk;}
+    renderTable(output);
+}
 
-                let C_has=simC.finalHas!==null?simC.finalHas:A_has;
-                let C_p=simC.finalPart,C_d=simC.finalDesc,C_mk=simC.materialKey;
-                if(C_has&&C_mk===null){C_p=A_pn;C_d=A_desc;C_mk=A_mk;}
+function renderTable(list){
+    const tbody = document.getElementById("resultBody");
+    tbody.innerHTML="";
+    document.getElementById("resultSection").style.display="block";
+    if(list.length===0){
+        tbody.innerHTML = `<tr><td colspan="6" class="empty-result">无修改项，两份BOM完全一致</td></tr>`;
+        showToast("计算完成，无差异");
+        return;
+    }
+    list.forEach(row=>{
+        const tr = document.createElement("tr");
+        tr.className = row.action==="DELETE"?"del-row":"add-row";
+        tr.innerHTML = `<td>${row.partNum}</td><td>${row.partDesc}</td><td>${row.loc}</td><td>${row.action}</td><td>${row.qty}</td><td>${row.remark}</td>`;
+        tbody.appendChild(tr);
+    })
+    showToast(`计算完成，输出${list.length}条`);
+}
 
-                if(B_has&&!C_has){
-                    res.push({partNum:B_p||"",partDesc:B_d||"",loc,action:"DELETE",remark:"B有C无，删除"});
-                }else if(!B_has&&C_has){
-                    res.push({partNum:C_p||"",partDesc:C_d||"",loc,action:"ADD",remark:"B无C有，新增"});
-                }else if(B_has&&C_has){
-                    if(B_mk!==C_mk){
-                        res.push({partNum:B_p||"",partDesc:B_d||"",loc,action:"DELETE",remark:"物料变更删旧料"});
-                        res.push({partNum:C_p||"",partDesc:C_d||"",loc,action:"ADD",remark:"物料变更加新料"});
-                    }
-                }
-            }
+async function copyResult(){
+    const tbody = document.getElementById("resultBody");
+    if(tbody.querySelector(".empty-result")){showToast("无结果");return;}
+    let txt = "物料编码\t物料描述\t位号\t操作\t数量\t备注\n";
+    tbody.querySelectorAll("tr").forEach(tr=>{
+        const cols = Array.from(tr.querySelectorAll("td")).map(d=>d.textContent);
+        txt += cols.join("\t")+"\n";
+    })
+    await navigator.clipboard.writeText(txt);
+    showToast("复制成功");
+}
 
-            const group=new Map();
-            for(const it of res){
-                const k=`${it.action}|${it.partNum}|${it.partDesc}`;
-                if(!group.has(k)) group.set(k,{...it,locs:[]});
-                group.get(k).locs.push(it.loc);
-            }
-            const out=Array.from(group.values()).map(g=>({
-                partNum:g.partNum,
-                partDesc:g.partDesc,
-                loc:LocUtils.merge(g.locs),
-                action:g.action,
-                qty:g.locs.length,
-                remark:g.remark
-            }));
+function exportXlsx(){
+    const tbody = document.getElementById("resultBody");
+    if(tbody.querySelector(".empty-result")){showToast("无结果导出");return;}
+    const rows = [["物料编码","物料描述","位号","操作","数量","备注"]];
+    tbody.querySelectorAll("tr").forEach(tr=>{
+        rows.push(Array.from(tr.querySelectorAll("td")).map(td=>td.textContent));
+    })
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb,ws,"BOM修改项");
+    XLSX.writeFile(wb,"BOM修改项.xlsx");
+    showToast("导出Excel完成");
+}
 
-            //执行业务校验
-            const checkList = runBusinessCheck(out);
-            if(checkList.length>0){
-                renderCheckModal(checkList);
-            }
+window.onclick = e=>{
+    const pv = document.getElementById("previewModal");
+    const mCheck=document.getElementById("businessCheckModal");
+    if(e.target === pv) pv.style.display="none";
+    if(e.target === mCheck) mCheck.style.display="none";
+}
 
-            render(out);
+// ====================物料归一化业务校验模块 V0.55‑rawStrMatch【全部归一告警增加子分组】====================
+function getRawResString(str){
+    if(!str) return null;
+    return str.trim();
+}
+
+function parseBcItemDesc(rawDesc){
+    const ret = { parseError:false, parsed:null };
+    if(!rawDesc){
+        ret.parseError=true;
+        return ret;
+    }
+    const arr = rawDesc.split(',');
+    const type = arr[0].trim();
+    if(type === '厚膜电阻'){
+        ret.parsed = {
+            type:"厚膜电阻",
+            power: arr[1]?.trim()||"",
+            resStr: getRawResString(arr[2]||""),
+            tolerance: arr[3]?.trim()||"",
+            package: arr[4]?.trim()||""
         }
-
-        function render(list){
-            const tbody=document.getElementById("resultBody");
-            tbody.innerHTML="";
-            if(!list.length){
-                tbody.innerHTML=`<tr><td colspan="6" class="empty-result">无对比结果</td></tr>`;
-                document.getElementById("resultSection").style.display="block";
-                showToast("计算完成，无差异");
-                return;
-            }
-            list.forEach(item=>{
-                const tr=document.createElement("tr");
-                tr.className=item.action==="DELETE"?"del-row":"add-row";
-                tr.innerHTML=`<td>${item.partNum}</td><td>${item.partDesc}</td><td>${item.loc}</td><td>${item.action}</td><td>${item.qty}</td><td>${item.remark}</td>`;
-                tbody.appendChild(tr);
-            });
-            document.getElementById("resultSection").style.display="block";
-            showToast(`计算完成，共${list.length}条输出`);
+        return ret;
+    }else if(type === '片式陶瓷电容'){
+        ret.parsed = {
+            type:"片式陶瓷电容",
+            capValue: parseFloat((arr[3]||"").replace(/uF/i,'')),
+            voltage: arr[2]?.trim()||"",
+            tolerance: arr[4]?.trim()||"",
+            dielectric: arr[5]?.trim()||"",
+            package: arr[6]?.trim()||""
         }
+        return ret;
+    }
+    ret.parsed = { type:type };
+    ret.parseError = false;
+    return ret;
+}
 
-        async function copyTable(){
-            const rows=Array.from(document.querySelectorAll("#resultBody tr"));
-            if(!rows.length||rows[0].querySelector(".empty-result")){showToast("无结果");return;}
-            let txt="物料编码\t物料描述\t位号\t操作\t数量\t备注\n";
-            rows.forEach(tr=>{
-                txt+=Array.from(tr.querySelectorAll("td")).map(d=>d.textContent).join("\t")+"\n";
-            });
-            await navigator.clipboard.writeText(txt);
-            showToast("已复制");
+function groupBy(list, getKey){
+    const map = {};
+    for(const item of list){
+        const k = getKey(item);
+        if(!map[k]) map[k] = [];
+        map[k].push(item);
+    }
+    return map;
+}
+
+function sortSn(snArr){
+    return [...snArr].sort((a,b)=>{
+        const numA = Number(a.replace(/[^0-9]/g,''));
+        const numB = Number(b.replace(/[^0-9]/g,''));
+        return numA - numB;
+    })
+}
+
+function deduplicateCheckList(list){
+    const seen = new Set();
+    const out = [];
+    for(const row of list){
+        //子分组tolGroups也参与去重key
+        const tolKey = row.tolGroups ? JSON.stringify(row.tolGroups) : "";
+        const key = `${row.title}||${row.info}||${row.sn.sort().join(',')}||${tolKey}`;
+        if(!seen.has(key)){
+            seen.add(key);
+            out.push(row);
         }
+    }
+    return out;
+}
 
-        function exportExcel(){
-            const rows=[["物料编码","物料描述","位号","操作","数量","备注"]];
-            const trs=document.querySelectorAll("#resultBody tr");
-            if(!trs.length||trs[0].querySelector(".empty-result")){showToast("无结果导出");return;}
-            trs.forEach(tr=>{
-                rows.push(Array.from(tr.querySelectorAll("td")).map(td=>td.textContent));
-            });
-            const wb=XLSX.utils.book_new();
-            const ws=XLSX.utils.aoa_to_sheet(rows);
-            XLSX.utils.book_append_sheet(wb,ws,"B‑C结果");
-            XLSX.writeFile(wb,"B‑C对比结果.xlsx");
-            showToast("已导出Excel");
-        }
-
-        window.onclick=e=>{
-            const m1=document.getElementById("instructionModal");
-            const m2=document.getElementById("previewModal");
-            const mCheck=document.getElementById("businessCheckModal");
-            if(e.target===m1) m1.style.display="none";
-            if(e.target===m2) m2.style.display="none";
-            if(e.target===mCheck) mCheck.style.display="none";
-        };
-
-        // ====================物料归一化业务校验模块 V0.55‑rawStrMatch====================
-        function getRawResString(str){
-            if(!str) return null;
-            return str.trim();
-        }
-
-        function parseBcItemDesc(rawDesc){
-            const ret = { parseError:false, parsed:null };
-            if(!rawDesc){
-                ret.parseError=true;
-                return ret;
-            }
-            const arr = rawDesc.split(',');
-            const type = arr[0].trim();
-            if(type === '厚膜电阻'){
-                ret.parsed = {
-                    type:"厚膜电阻",
-                    power: arr[1]?.trim()||"",
-                    resStr: getRawResString(arr[2]||""),
-                    tolerance: arr[3]?.trim()||"",
-                    package: arr[4]?.trim()||""
-                }
-                return ret;
-            }else if(type === '片式陶瓷电容'){
-                ret.parsed = {
-                    type:"片式陶瓷电容",
-                    capValue: parseFloat((arr[3]||"").replace(/uF/i,'')),
-                    voltage: arr[2]?.trim()||"",
-                    tolerance: arr[4]?.trim()||"",
-                    dielectric: arr[5]?.trim()||"",
-                    package: arr[6]?.trim()||""
-                }
-                return ret;
-            }
-            ret.parsed = { type:type };
-            ret.parseError = false;
-            return ret;
-        }
-
-        function groupBy(list, getKey){
-            const map = {};
-            for(const item of list){
-                const k = getKey(item);
-                if(!map[k]) map[k] = [];
-                map[k].push(item);
-            }
-            return map;
-        }
-
-        function sortSn(snArr){
-            return [...snArr].sort((a,b)=>{
-                const numA = Number(a.replace(/[^0-9]/g,''));
-                const numB = Number(b.replace(/[^0-9]/g,''));
-                return numA - numB;
+function runBusinessCheck(bcOut){
+    const checkList = [];
+    const addRawItems = bcOut.filter(it=>it.action === 'ADD');
+    const addList = [];
+    for(const row of addRawItems){
+        const snList = LocUtil.split(row.loc);
+        for(const sn of snList){
+            const p = parseBcItemDesc(row.partDesc);
+            addList.push({
+                sn: sn,
+                rawDesc: row.partDesc,
+                parseError: p.parseError,
+                parsed: p.parsed
             })
         }
+    }
 
-        function deduplicateCheckList(list){
-            const seen = new Set();
-            const out = [];
-            for(const row of list){
-                const key = `${row.title}||${row.info}||${row.sn.sort().join(',')}`;
-                if(!seen.has(key)){
-                    seen.add(key);
-                    out.push(row);
-                }
-            }
-            return out;
-        }
+    const RES_GROUP_A = new Set(["0ohm", "22ohm", "33ohm"]);
+    const RES_GROUP_B = new Set(["1kohm", "4.7kohm", "10kohm"]);
 
-        function runBusinessCheck(bcOut){
-            const checkList = [];
-            const addRawItems = bcOut.filter(it=>it.action === 'ADD');
-            const addList = [];
-            for(const row of addRawItems){
-                const snList = LocUtils.split(row.loc);
-                for(const sn of snList){
-                    const p = parseBcItemDesc(row.partDesc);
-                    addList.push({
-                        sn: sn,
-                        rawDesc: row.partDesc,
-                        parseError: p.parseError,
-                        parsed: p.parsed
+    // 厚膜电阻校验
+    const resItems = addList.filter(x=>x.parsed?.type === '厚膜电阻' && x.parsed.resStr !== null);
+    const resGroup = groupBy(resItems, i=>`${i.parsed.type}|${i.parsed.power}|${i.parsed.package}`);
+    for(const groupVal of Object.values(resGroup)){
+        if(groupVal.length < 2) continue;
+        //同阻值多精度
+        const byR = groupBy(groupVal, x=>x.parsed.resStr);
+        for(const sub of Object.values(byR)){
+            const tolSet = [...new Set(sub.map(s=>s.parsed.tolerance))];
+            if(tolSet.length>1){
+                const byTolSub = groupBy(sub, x=>x.parsed.tolerance);
+                const tolGroups = [];
+                for(const tolKey of Object.keys(byTolSub)){
+                    tolGroups.push({
+                        label:tolKey,
+                        sns: sortSn(byTolSub[tolKey].map(i=>i.sn))
                     })
                 }
+                const snList = sortSn(sub.map(s=>s.sn));
+                checkList.push({
+                    level:'🟡',
+                    title:'物料归一建议‑同阻值仅精度不同',
+                    info:`${sub[0].parsed.type},${sub[0].parsed.power},${sub[0].parsed.resStr},${sub[0].parsed.package}；存在精度：${tolSet.join(',')}`,
+                    sn:snList,
+                    tolGroups: tolGroups
+                })
             }
-
-            const RES_GROUP_A = new Set(["0ohm", "22ohm", "33ohm"]);
-            const RES_GROUP_B = new Set(["1kohm", "4.7kohm", "10kohm"]);
-
-            // 厚膜电阻校验
-            const resItems = addList.filter(x=>x.parsed?.type === '厚膜电阻' && x.parsed.resStr !== null);
-            const resGroup = groupBy(resItems, i=>`${i.parsed.type}|${i.parsed.power}|${i.parsed.package}`);
-            for(const groupVal of Object.values(resGroup)){
-                if(groupVal.length < 2) continue;
-                //同阻值多精度
-                const byR = groupBy(groupVal, x=>x.parsed.resStr);
-                for(const sub of Object.values(byR)){
-                    const tolSet = [...new Set(sub.map(s=>s.parsed.tolerance))];
-                    if(tolSet.length>1){
-                        const snList = sortSn(sub.map(s=>s.sn));
-                        checkList.push({
-                            level:'🟡',
-                            title:'物料归一建议‑同阻值仅精度不同',
-                            info:`${sub[0].parsed.type},${sub[0].parsed.power},${sub[0].parsed.resStr},${sub[0].parsed.package}；存在精度：${tolSet.join(',')}`,
-                            sn:snList
-                        })
-                    }
+        }
+        //按精度分组，A/B两组原始字符串阻值集合
+        const byTol = groupBy(groupVal, x=>x.parsed.tolerance);
+        for(const tolGroup of Object.values(byTol)){
+            const hitA = tolGroup.filter(i=>RES_GROUP_A.has(i.parsed.resStr));
+            if(hitA.length>=2){
+                const byRHitA = groupBy(hitA, x=>x.parsed.resStr);
+                const rGroups = [];
+                for(const rKey of Object.keys(byRHitA)){
+                    rGroups.push({
+                        label:rKey,
+                        sns: sortSn(byRHitA[rKey].map(i=>i.sn))
+                    })
                 }
-                //按精度分组，A/B两组原始字符串阻值集合
-                const byTol = groupBy(groupVal, x=>x.parsed.tolerance);
-                for(const tolGroup of Object.values(byTol)){
-                    const hitA = tolGroup.filter(i=>RES_GROUP_A.has(i.parsed.resStr));
-                    if(hitA.length>=2){
-                        const uniqueRA = [...new Set(hitA.map(x=>x.parsed.resStr))];
-                        if(uniqueRA.length >=2){
-                            const snList = sortSn(hitA.map(s=>s.sn));
-                            checkList.push({
-                                level:'🟡',
-                                title:'物料归一建议‑串阻阻值集合(0ohm/22ohm/33ohm)',
-                                info:`${hitA[0].parsed.type},${hitA[0].parsed.power},${hitA[0].parsed.tolerance},${hitA[0].parsed.package}；阻值：${uniqueRA.join(',')}`,
-                                sn:snList
-                            })
-                        }
-                    }
-                    const hitB = tolGroup.filter(i=>RES_GROUP_B.has(i.parsed.resStr));
-                    if(hitB.length>=2){
-                        const uniqueRB = [...new Set(hitB.map(x=>x.parsed.resStr))];
-                        if(uniqueRB.length >=2){
-                            const snList = sortSn(hitB.map(s=>s.sn));
-                            checkList.push({
-                                level:'🟡',
-                                title:'物料归一建议‑上下拉阻值集合(1kohm/4.7kohm/10kohm)',
-                                info:`${hitB[0].parsed.type},${hitB[0].parsed.power},${hitB[0].parsed.tolerance},${hitB[0].parsed.package}；阻值：${uniqueRB.join(',')}`,
-                                sn:snList
-                            })
-                        }
-                    }
-                }
-            }
-
-            //片式陶瓷电容校验
-            const capItems = addList.filter(x=>x.parsed?.type === '片式陶瓷电容');
-            const capGroup = groupBy(capItems, i=>`${i.parsed.type}|${i.parsed.capValue}|${i.parsed.dielectric}|${i.parsed.package}`);
-            for(const groupVal of Object.values(capGroup)){
-                if(groupVal.length<2) continue;
-                const voltSet = [...new Set(groupVal.map(x=>x.parsed.voltage))];
-                if(voltSet.length>1){
-                    const snList = sortSn(groupVal.map(s=>s.sn));
+                const uniqueRA = [...new Set(hitA.map(x=>x.parsed.resStr))];
+                if(uniqueRA.length >=2){
+                    const snList = sortSn(hitA.map(s=>s.sn));
                     checkList.push({
                         level:'🟡',
-                        title:'物料归一建议‑仅耐压不同',
-                        info:`${groupVal[0].parsed.type},${groupVal[0].parsed.capValue}uF,${groupVal[0].parsed.dielectric},${groupVal[0].parsed.package}；耐压：${voltSet.join(',')}`,
-                        sn:snList
+                        title:'物料归一建议‑串阻阻值集合(0ohm/22ohm/33ohm)',
+                        info:`${hitA[0].parsed.type},${hitA[0].parsed.power},${hitA[0].parsed.tolerance},${hitA[0].parsed.package}；阻值：${uniqueRA.join(',')}`,
+                        sn:snList,
+                        tolGroups: rGroups
                     })
                 }
-                const tolSet = [...new Set(groupVal.map(x=>x.parsed.tolerance))];
-                if(tolSet.length>1){
-                    const snList = sortSn(groupVal.map(s=>s.sn));
+            }
+            const hitB = tolGroup.filter(i=>RES_GROUP_B.has(i.parsed.resStr));
+            if(hitB.length>=2){
+                const byRHitB = groupBy(hitB, x=>x.parsed.resStr);
+                const rGroups = [];
+                for(const rKey of Object.keys(byRHitB)){
+                    rGroups.push({
+                        label:rKey,
+                        sns: sortSn(byRHitB[rKey].map(i=>i.sn))
+                    })
+                }
+                const uniqueRB = [...new Set(hitB.map(x=>x.parsed.resStr))];
+                if(uniqueRB.length >=2){
+                    const snList = sortSn(hitB.map(s=>s.sn));
                     checkList.push({
                         level:'🟡',
-                        title:'物料归一建议‑仅精度不同',
-                        info:`${groupVal[0].parsed.type},${groupVal[0].parsed.capValue}uF,${groupVal[0].parsed.dielectric},${groupVal[0].parsed.package}；精度：${tolSet.join(',')}`,
-                        sn:snList
+                        title:'物料归一建议‑上下拉阻值集合(1kohm/4.7kohm/10kohm)',
+                        info:`${hitB[0].parsed.type},${hitB[0].parsed.power},${hitB[0].parsed.tolerance},${hitB[0].parsed.package}；阻值：${uniqueRB.join(',')}`,
+                        sn:snList,
+                        tolGroups: rGroups
                     })
                 }
             }
-
-            //FPC/FFC检测、解析失败
-            for(const item of addList){
-                const desc = item.rawDesc||'';
-                if(/FPC|FFC/i.test(desc)){
-                    checkList.push({
-                        level:'🔔',
-                        title:'结构风险提醒‑FPC/FFC座子核对',
-                        info:'物料包含FPC/FFC，请核对当前屏型号，确认座子料号与屏结构匹配',
-                        sn:[item.sn]
-                    })
-                }
-                if(item.parseError){
-                    checkList.push({
-                        level:'⚠️',
-                        title:'物料参数解析失败，请人工复核',
-                        info:item.rawDesc,
-                        sn:[item.sn]
-                    })
-                }
-            }
-            return deduplicateCheckList(checkList);
         }
+    }
 
-        function renderCheckModal(checkList){
-            const modal = document.getElementById("businessCheckModal");
-            const tbody = document.getElementById("checkResultBody");
-            tbody.innerHTML = '';
-            for(const row of checkList){
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.level}</td>
-                    <td>${row.title}</td>
-                    <td>${row.info}</td>
-                    <td>${sortSn(row.sn).join(",")}</td>
-                `;
-                tbody.appendChild(tr);
+    //片式陶瓷电容校验
+    const capItems = addList.filter(x=>x.parsed?.type === '片式陶瓷电容');
+    const capGroup = groupBy(capItems, i=>`${i.parsed.type}|${i.parsed.capValue}|${i.parsed.dielectric}|${i.parsed.package}`);
+    for(const groupVal of Object.values(capGroup)){
+        if(groupVal.length<2) continue;
+        //耐压不同
+        const voltSet = [...new Set(groupVal.map(x=>x.parsed.voltage))];
+        if(voltSet.length>1){
+            const byVolt = groupBy(groupVal, x=>x.parsed.voltage);
+            const voltGroups = [];
+            for(const vKey of Object.keys(byVolt)){
+                voltGroups.push({
+                    label:vKey,
+                    sns: sortSn(byVolt[vKey].map(i=>i.sn))
+                })
             }
-            modal.style.display = "block";
+            const snList = sortSn(groupVal.map(s=>s.sn));
+            checkList.push({
+                level:'🟡',
+                title:'物料归一建议‑仅耐压不同',
+                info:`${groupVal[0].parsed.type},${groupVal[0].parsed.capValue}uF,${groupVal[0].parsed.dielectric},${groupVal[0].parsed.package}；耐压：${voltSet.join(',')}`,
+                sn:snList,
+                tolGroups: voltGroups
+            })
         }
+        //精度不同
+        const tolSet = [...new Set(groupVal.map(x=>x.parsed.tolerance))];
+        if(tolSet.length>1){
+            const byTolCap = groupBy(groupVal, x=>x.parsed.tolerance);
+            const tolGroups = [];
+            for(const tolKey of Object.keys(byTolCap)){
+                tolGroups.push({
+                    label:tolKey,
+                    sns: sortSn(byTolCap[tolKey].map(i=>i.sn))
+                })
+            }
+            const snList = sortSn(groupVal.map(s=>s.sn));
+            checkList.push({
+                level:'🟡',
+                title:'物料归一建议‑仅精度不同',
+                info:`${groupVal[0].parsed.type},${groupVal[0].parsed.capValue}uF,${groupVal[0].parsed.dielectric},${groupVal[0].parsed.package}；精度：${tolSet.join(',')}`,
+                sn:snList,
+                tolGroups: tolGroups
+            })
+        }
+    }
 
-        document.getElementById("closeCheckModal").onclick = function(){
-            document.getElementById("businessCheckModal").style.display = "none";
-        };
-    </script>
+    //FPC/FFC检测、解析失败
+    for(const item of addList){
+        const desc = item.rawDesc||'';
+        if(/FPC|FFC/i.test(desc)){
+            checkList.push({
+                level:'🔔',
+                title:'结构风险提醒‑FPC/FFC座子核对',
+                info:'物料包含FPC/FFC，请核对当前屏型号，确认座子料号与屏结构匹配',
+                sn:[item.sn]
+            })
+        }
+        if(item.parseError){
+            checkList.push({
+                level:'⚠️',
+                title:'物料参数解析失败，请人工复核',
+                info:item.rawDesc,
+                sn:[item.sn]
+            })
+        }
+    }
+    return deduplicateCheckList(checkList);
+}
+
+function renderCheckModal(checkList){
+    const modal = document.getElementById("businessCheckModal");
+    const tbody = document.getElementById("checkResultBody");
+    tbody.innerHTML = '';
+    for(const row of checkList){
+        const tr = document.createElement('tr');
+        let snCellText;
+        if(row.tolGroups && Array.isArray(row.tolGroups)){
+            snCellText = row.tolGroups.map(g=>`${g.label}:${g.sns.join(",")}`).join("；");
+        }else{
+            snCellText = sortSn(row.sn).join(",");
+        }
+        tr.innerHTML = `
+            <td>${row.level}</td>
+            <td>${row.title}</td>
+            <td>${row.info}</td>
+            <td>${snCellText}</td>
+        `;
+        tbody.appendChild(tr);
+    }
+    modal.style.display = "flex";
+}
+
+//绑定关闭弹窗按钮
+document.getElementById("closeCheckModal").onclick = function(){
+    document.getElementById("businessCheckModal").style.display = "none";
+};
+
+</script>
 </body>
 </html>
